@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="100天朋友养成模拟：8题摸底生成初始面板，每天6个突发事件，五项属性、隐藏印记、长线剧情与7种结局。">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{color-scheme:dark}
+body{margin:0;font:14px/1.5 system-ui,-apple-system,sans-serif;background:#151220}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>读懂温雅欢</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ink:#151220; --ink2:#1C1829; --panel:#221D33; --raise:#2B2440;
+  --line:#372E4F; --line2:#4A3E68;
+  --tx:#EFE8F4; --tx2:#B5ABC9; --tx3:#796F93;
+  --her:#D38CB4;        /* 她的声音 · 暗玫 */
+  --sys:#6FC3C0;        /* 系统 · 冷青 */
+  --warm:#E8A05C;       /* 提示 · 暖灯 */
+  --good:#79C79B; --bad:#E0697A; --cream:#F3EADF;
+  --shadow:0 18px 44px -24px rgba(0,0,0,.95);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--ink); color:var(--tx);
+  font-family:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(1100px 520px at 82% -12%, rgba(211,140,180,.15), transparent 62%),
+    radial-gradient(760px 420px at 6% 104%, rgba(111,195,192,.09), transparent 60%);
+  background-attachment:fixed;
+}
+.wrap{max-width:620px;margin:0 auto;padding:0 18px;padding-block:0 56px}
+
+/* ---------- 顶部面板 ---------- */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+  background:linear-gradient(180deg,rgba(21,18,32,.98) 72%,rgba(21,18,32,.82));
+  backdrop-filter:blur(10px);margin:0 -18px;padding:10px 18px 12px;border-bottom:1px solid var(--line)}
+.hudtop{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+.day{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.14em;color:var(--sys);text-transform:uppercase}
+.day b{font-size:17px;color:var(--tx);font-weight:600}
+.who{font-family:"Noto Serif SC",serif;font-size:13px;color:var(--tx3);margin-left:10px;letter-spacing:.08em}
+.lovebox{display:inline-flex;align-items:center;gap:6px;margin-left:auto}
+.lovebox b{font-family:"JetBrains Mono",monospace;font-size:16px;color:var(--her);font-variant-numeric:tabular-nums}
+.lovebox .lb{font-size:9.5px;letter-spacing:.2em;color:var(--tx3)}
+.lovebox svg{filter:drop-shadow(0 0 7px rgba(211,140,180,.55))}
+.lovebox.pump{animation:pump .72s cubic-bezier(.3,1.5,.4,1)}
+.lovebox.crack{animation:crk .66s ease}
+@keyframes crk{0%,100%{transform:translateX(0) rotate(0)}18%{transform:translateX(-5px) rotate(-7deg)}36%{transform:translateX(5px) rotate(7deg)}54%{transform:translateX(-4px) rotate(-4deg)}72%{transform:translateX(3px) rotate(2deg)}}
+#fx .vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 25%,transparent 38%,rgba(72,96,146,.38) 100%)}
+.ava.sad{background:linear-gradient(150deg,#9FB4D8,#6E7FA8);box-shadow:0 0 0 1px rgba(142,155,232,.35),0 0 20px -6px rgba(142,155,232,.6)}
+@keyframes pump{0%{transform:scale(1)}26%{transform:scale(1.38)}55%{transform:scale(.94)}100%{transform:scale(1)}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:900;overflow:hidden;contain:strict}
+#fx span{position:absolute;left:0;top:0;will-change:transform,opacity;line-height:1;user-select:none}
+.bars{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px}
+@media(max-width:430px){.bars{grid-template-columns:1fr}}
+.bar{display:grid;grid-template-columns:62px 1fr 34px;align-items:center;gap:8px}
+.bar .n{font-size:11.5px;color:var(--tx2);letter-spacing:.04em;white-space:nowrap}
+.bar .t{height:5px;border-radius:99px;background:#2C2540;overflow:hidden;position:relative}
+.bar .f{height:100%;border-radius:99px;transition:width .55s cubic-bezier(.2,.8,.3,1)}
+.bar .v{font-family:"JetBrains Mono",monospace;font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+.bar .t::after{content:"";position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--line2)}
+.bar.goal80 .t::after{left:80%}
+.bar.goal20 .t::after{left:20%}
+.bar.ok .v{color:var(--good)}
+.bar.danger .v{color:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.chip{font-size:10.5px;padding:2px 8px;border-radius:99px;border:1px solid var(--line2);color:var(--tx2);letter-spacing:.04em}
+.chip.b{border-color:rgba(121,199,155,.45);color:var(--good);background:rgba(121,199,155,.07)}
+.chip.d{border-color:rgba(224,105,122,.45);color:var(--bad);background:rgba(224,105,122,.07)}
+
+/* ---------- 通用 ---------- */
+h1{font-family:"Noto Serif SC",serif;font-size:30px;font-weight:700;letter-spacing:.02em;margin:34px 0 4px;text-wrap:balance;line-height:1.3}
+h1 small{display:block;font-family:"Noto Sans SC";font-size:12px;font-weight:300;letter-spacing:.3em;color:var(--sys);margin-bottom:10px}
+.lede{color:var(--tx2);font-size:14px;max-width:46em}
+.rule{border:0;border-top:1px solid var(--line);margin:26px 0}
+.eyebrow{font-size:11px;letter-spacing:.26em;color:var(--tx3);text-transform:uppercase;font-family:"JetBrains Mono",monospace}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:18px 18px 16px;box-shadow:var(--shadow);margin-top:16px}
+.scene{font-family:"Noto Serif SC",serif;color:var(--tx2);font-size:14.5px;line-height:1.95;font-style:normal}
+.scene::before{content:"";display:block;width:26px;height:1px;background:var(--line2);margin-bottom:12px}
+
+.say{display:flex;gap:11px;margin-top:16px;align-items:flex-start}
+.ava{flex:0 0 34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  font-family:"Noto Serif SC",serif;font-size:15px;color:#2A1726;
+  background:linear-gradient(150deg,#E6A9C9,#C97FA6);box-shadow:0 0 0 1px rgba(211,140,180,.3),0 0 20px -6px rgba(211,140,180,.6)}
+.bub{background:var(--raise);border:1px solid var(--line2);border-radius:3px 13px 13px 13px;padding:11px 14px;
+  font-family:"Noto Serif SC",serif;font-size:15.5px;line-height:1.85;color:var(--cream);max-width:100%}
+.bub.hot{border-color:rgba(224,105,122,.5);background:#33223080}
+.bub.cold{color:var(--tx2);font-style:italic}
+.react{margin-top:14px;padding-left:45px}
+.react .bub{border-color:rgba(211,140,180,.45)}
+
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.opt{text-align:left;background:var(--ink2);border:1px solid var(--line);color:var(--tx);
+  border-radius:3px;padding:11px 14px;cursor:pointer;font:inherit;font-size:14.5px;line-height:1.7;
+  display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline;transition:border-color .18s,background .18s,transform .18s}
+.opt:hover{border-color:var(--her);background:#261F38;transform:translateX(3px)}
+.opt:focus-visible{outline:2px solid var(--sys);outline-offset:2px}
+.opt .k{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--her);letter-spacing:.1em}
+.opt .tag{grid-column:2;font-size:10.5px;color:var(--tx3);letter-spacing:.08em}
+.opt .tx{grid-column:2;grid-row:1}
+.opt[disabled]{opacity:.32;cursor:default;transform:none}
+.opt.picked{border-color:var(--her);background:#2A2140;opacity:1}
+
+.btn{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--her);color:var(--her);
+  padding:9px 20px;border-radius:99px;font:inherit;font-size:13.5px;letter-spacing:.06em;cursor:pointer;transition:.18s;margin-top:18px}
+.btn:hover{background:var(--her);color:#201428}
+.btn.g{border-color:var(--sys);color:var(--sys)}.btn.g:hover{background:var(--sys);color:#102422}
+.btn.q{border-color:var(--line2);color:var(--tx2);font-size:12px;padding:6px 14px}
+.btn.q:hover{background:var(--raise);color:var(--tx)}
+.btn:focus-visible{outline:2px solid var(--sys);outline-offset:3px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+.banner{border-left:2px solid var(--warm);background:linear-gradient(90deg,rgba(232,160,92,.12),transparent 70%);
+  padding:9px 14px;margin-top:20px;font-size:13px;color:var(--warm);letter-spacing:.04em}
+.banner.v{border-color:var(--her);background:linear-gradient(90deg,rgba(211,140,180,.14),transparent 70%);color:var(--her)}
+.banner.c{border-color:var(--bad);background:linear-gradient(90deg,rgba(224,105,122,.14),transparent 70%);color:var(--bad)}
+.banner.s{border-color:var(--sys);background:linear-gradient(90deg,rgba(111,195,192,.12),transparent 70%);color:var(--sys)}
+
+.deltas{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin-top:14px}
+.dl{border:1px solid var(--line);border-radius:3px;padding:8px 10px;background:var(--ink2)}
+.dl .n{font-size:11px;color:var(--tx3)}
+.dl .v{font-family:"JetBrains Mono",monospace;font-size:16px;font-variant-numeric:tabular-nums}
+.dl .c{font-family:"JetBrains Mono",monospace;font-size:11px;margin-left:5px}
+.up{color:var(--good)}.dn{color:var(--bad)}.fl{color:var(--tx3)}
+
+.ilist{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.ia{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);
+  background:var(--ink2);border-radius:3px;padding:9px 12px;cursor:pointer;font:inherit;color:var(--tx);text-align:left;transition:.18s}
+.ia:hover:not([disabled]){border-color:var(--sys);background:#20283A}
+.ia[disabled]{opacity:.38;cursor:default}
+.ia .nm{font-size:14px}
+.ia .cd{font-size:10.5px;color:var(--tx3);font-family:"JetBrains Mono",monospace}
+.ia .st{font-size:11px;color:var(--sys);font-family:"JetBrains Mono",monospace}
+
+.qnum{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;color:var(--sys)}
+.qtxt{font-family:"Noto Serif SC",serif;font-size:19px;line-height:1.7;margin:8px 0 2px;text-wrap:balance}
+.prog{display:flex;gap:4px;margin-top:14px}
+.prog i{height:2px;flex:1;background:#2C2540;border-radius:2px}
+.prog i.on{background:var(--her)}
+
+.end{text-align:center;padding:30px 0}
+.end .tier{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.3em;color:var(--sys)}
+.end h2{font-family:"Noto Serif SC",serif;font-size:27px;margin:10px 0 14px;text-wrap:balance}
+.end p{color:var(--tx2);text-align:left;max-width:40em;margin:0 auto 12px;font-size:14.5px}
+.fin{font-family:"Noto Serif SC",serif;color:var(--cream);font-size:16px;line-height:2;text-align:left;max-width:40em;margin:18px auto 0;
+  border-left:2px solid var(--her);padding-left:16px}
+
+.fade{animation:fu .4s cubic-bezier(.2,.8,.3,1) both}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.foot{margin-top:30px;color:var(--tx3);font-size:11.5px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.lnk{color:var(--tx3);background:none;border:0;font:inherit;font-size:11.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0}
+.lnk:hover{color:var(--her)}
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-size:12px;color:var(--tx3);letter-spacing:.08em}
+details ul{margin:10px 0 0;padding-left:18px;color:var(--tx2);font-size:12.5px;line-height:1.9}
+</style>
+
+</head>
+<body>
+<div id="fx" aria-hidden="true"></div>
+<div class="wrap">
+  <div class="hud" id="hud" hidden></div>
+  <div id="app"></div>
+  <div class="foot">
+    <span>读懂温雅欢 · 朋友养成系</span>
+    <button class="lnk" id="restart">重新开始</button>
+    <span id="savenote"></span>
+  </div>
+</div>
+<script>
+/* ============ 题库 ============ */
+const QUIZ=[
+ {q:"温雅欢的生日是？",o:["2005年3月13日","2005年3月31日","2005年3月12日","2004年3月13日"],a:0},
+ {q:"温雅欢是什么星座？",o:["水瓶座","双鱼座","白羊座","摩羯座"],a:1},
+ {q:"下面四件事她都想要。哪一件是她最核心、少了就不行的？",
+  o:["人缘很好，身边一直有很多人喜欢她","在你这里，她是唯一的那一个","不管说什么，都有人秒回她消息","被照顾得很周到，什么都有人替她安排"],a:1},
+ {q:"她是高需求型人格。下面哪一样，是她每天都要从你这儿补充的？",
+  o:["持续的肯定、认可、被需要的感觉","有人一直陪着，不让她落单","不断有新鲜事和小惊喜","闹完就翻篇，被无条件原谅"],a:0},
+ {q:"情绪崩溃的时候，下面这几句她都不爱听。哪一句对她伤害最大？",
+  o:["你这样下去，身边的人迟早会被你消耗完","你怎么这么矫情，多大点事","我现在真的没空，等我忙完再说","别人遇到这种事，也没你反应这么大"],a:1},
+ {q:"同样是夸她，哪一种她最吃？",
+  o:["你真的很厉害，这种事换我肯定做不成","你笑起来特别好看，每次看见都会被治愈","我知道你为这个熬了多少个晚上，这不是运气","你这次做得特别好，比上次进步太多了"],a:2},
+ {q:"她吃醋、反复试探你的时候，底下真正在动的是什么？",
+  o:["她在考验你的耐心，看你会不会嫌烦","她想确认自己还是不是那个特别的","她喜欢被哄，享受你哄她的那个过程","她单纯对那个人本身有意见"],a:1},
+ {q:"一场暴躁崩溃之后，她一个人待着的时候，心里通常在想什么？",
+  o:["后悔自责，怕你因为这次就不要她了","发泄完舒服多了，这事就算过去了","等着你先低头，她绝不主动","越想越委屈，气还没消"],a:0}
+];
+const QEXP=["她的生日是 2005.03.13。","3月13日，双鱼座。",
+ "人缘、秒回、被照顾，她都想要；但真正不能少的是“在你这里我是唯一”。",
+ "陪伴、新鲜、原谅都是加分项，肯定和被需要感才是她的日常口粮。",
+ "“矫情”两个字最狠——它否定的不是这件事，是她难受这件事本身的资格。",
+ "前三句都是真心话，但只有第三句说明你看见了过程，而不只是结果。",
+ "吃醋的底色是自卑和害怕被替代，她要的是“我还特别吗”的那个答案。",
+ "闹完之后最煎熬的是她自己：她在后悔，并且怕你因此走开。"];
+
+/* ============ 事件库 ============ 
+   d = [心理压力, 情绪值, 心情值, 信任值, 爱意]  压力为正=变糟
+   m = pref偏爱 / emp共情 / perf敷衍 / lect说教 / neu中性 */
+const EV=[
+/* ---------- 正向分享 share ---------- */
+{t:"share",s:"晚上八点多，她连发三张照片过来，全是同一片晚霞，角度只差一点点。",q:"今天放学路过天桥拍的，是不是超好看！你最喜欢哪张",
+ o:[{tag:"认真挑一张说细节",tx:"第二张。云被风扯开的那条缝正好压在楼顶上，你是等了一会儿才按的吧？",m:"pref",d:[-4,4,7,3,5],r:"……你居然看出来了。我站那儿吹了快十分钟的风，就为了等那条缝。只有你注意到了。"},
+     {tag:"笼统夸好看",tx:"都挺好看的。",m:"perf",d:[3,-2,-4,-2,-3],r:"哦。那我就不发了。"},
+     {tag:"问她当时在想什么",tx:"你一个人站在那儿拍了十分钟？当时在想什么。",m:"emp",d:[-3,3,4,4,3],r:"……其实在想，要是有人陪我一起看就好了。然后就想到你了。"}]},
+{t:"share",s:"她给你发来一段语音，背景音有锅铲声。",q:"我今天自己做了可乐鸡翅！虽然糊了一点点。你猜我做了多久",
+ o:[{tag:"往长了猜并追问过程",tx:"至少两个小时吧？你是不是还中途跑去查了视频。",m:"pref",d:[-3,3,6,3,4],r:"两小时四十分钟！我还重做了一次，第一次全焦了我没好意思说。你怎么什么都知道。"},
+     {tag:"关注结果",tx:"好吃吗？",m:"neu",d:[0,0,1,0,0],r:"……还行吧。你不想知道我做了多久吗。"},
+     {tag:"打趣糊了",tx:"糊了还敢发出来，胆子不小。",m:"perf",d:[4,-4,-5,-2,-3],r:"……我就知道你会这么说。当我没说过。"}]},
+{t:"share",s:"凌晨十二点半，她甩来一首歌的链接，没有配字。",q:"",
+ o:[{tag:"听完再回",tx:"（听完整首再回）第二段那句“没人会一直等我”，你是不是单曲循环了很多遍。",m:"emp",d:[-5,5,5,5,4],r:"……你真的去听了。我循环了一晚上。我以为你会直接回个“好听”。"},
+     {tag:"秒回好听",tx:"好听。",m:"perf",d:[4,-3,-4,-3,-3],r:"你肯定没听完。算了，睡了。"},
+     {tag:"问她怎么了",tx:"这个点发歌，是不是有什么事。",m:"emp",d:[-2,2,2,3,2],r:"也没什么大事……就是突然有点难受。你能问一句，我就好一点了。"}]},
+{t:"share",s:"她换了个新发卡，特意侧过头给你看。",q:"今天这个发卡，是不是跟我上次那条裙子很配",
+ o:[{tag:"记得那条裙子",tx:"配。就是你上个月穿去看展的那条浅蓝的吧，这个颜色正好接上。",m:"pref",d:[-3,3,6,4,6],r:"你连我哪天穿过什么都记得啊……我随口一提的东西，你居然都记着。"},
+     {tag:"顺口说配",tx:"配啊。",m:"perf",d:[2,-1,-3,-2,-2],r:"你根本不知道我说的是哪条裙子吧。"},
+     {tag:"夸她眼光",tx:"你挑东西的眼光一直很稳，这个很衬你。",m:"pref",d:[-2,2,4,2,2],r:"嘿嘿。那以后我买什么都先问你。"}]},
+{t:"share",s:"她把一张涂了很多层的画拍给你，颜料还没干。",q:"画了三个晚上。你看出来画的是什么了吗",
+ o:[{tag:"先看再说，说出层次",tx:"下面那层蓝你改过很多次吧，边缘都压重了。是夜里的海？",m:"pref",d:[-4,4,7,4,5],r:"是！！我改了四遍，一直调不出那个蓝。居然真的有人看出来我改过。"},
+     {tag:"直接说厉害",tx:"哇，好厉害。",m:"perf",d:[3,-2,-4,-2,-2],r:"……厉害在哪儿啊。你每次都这么说。"},
+     {tag:"承认看不出但问她",tx:"说实话我没完全看出来，你讲给我听，我想知道你想画什么。",m:"emp",d:[-3,3,4,4,3],r:"（一下子来劲了）我跟你讲！其实我想画的是……"}]},
+{t:"share",s:"她月考进步了二十名，截图发过来，打了三个感叹号。",q:"你看！！！我这次数学终于上来了",
+ o:[{tag:"夸过程",tx:"你上个月连着在图书馆泡了多少天，我都数得过来。这二十名是你熬出来的。",m:"pref",d:[-5,5,8,4,6],r:"……（停了很久）你是唯一一个说这句话的人。其他人都只说“运气好”。"},
+     {tag:"夸结果",tx:"厉害啊，二十名呢。",m:"neu",d:[0,0,2,0,0],r:"嗯。谢谢。"},
+     {tag:"顺带提醒",tx:"不错，继续保持，别松懈。",m:"lect",d:[5,-4,-5,-3,-3],r:"……我才高兴了两分钟。知道了。"}]},
+{t:"share",s:"她模仿班里一个同学说话，自己先笑趴了。",q:"哈哈哈哈你快看，他就是这样的！像不像",
+ o:[{tag:"接住梗",tx:"（学回去一句）是不是还得配这个表情。",m:"pref",d:[-4,4,6,2,3],r:"哈哈哈哈哈哈你好坏！我笑得肚子疼。跟你讲话真的好开心。"},
+     {tag:"淡淡回应",tx:"嗯，挺像的。",m:"perf",d:[2,-2,-3,-1,-2],r:"……你是不是在忙。那我不说了。"}]},
+{t:"share",s:"她抢到了一张喜欢的乐队的票，两张。",q:"我抢到票啦！！两张！！",
+ o:[{tag:"立刻接住暗示",tx:"两张——那另一张是留给我的吧？我现在就空出那天。",m:"pref",d:[-5,5,8,4,7],r:"你怎么一下就懂了。我本来还想绕半天才敢问你……"},
+     {tag:"只恭喜",tx:"恭喜！终于抢到了。",m:"neu",d:[1,0,1,0,-1],r:"嗯……对呀。（她没再说另一张的事）"},
+     {tag:"问要和谁去",tx:"那你打算叫谁一起去？",m:"perf",d:[4,-3,-4,-2,-4],r:"……本来想叫你的。既然你这么问，那算了。"}]},
+{t:"share",s:"她今天心情很好，说了一件很小的事。",q:"我今天在便利店，店员多给了我一颗糖，我开心了一整天，是不是很幼稚",
+ o:[{tag:"珍视她的小开心",tx:"一点都不幼稚。能被一颗糖哄好一整天，说明你本来就很容易对世界心软。",m:"pref",d:[-5,4,6,4,5],r:"……你这么一说，我突然有点想哭。为什么你总能说到我心里去。"},
+     {tag:"笑她",tx:"确实挺幼稚的哈哈。",m:"perf",d:[3,-3,-4,-2,-3],r:"……哦。那我以后不说了。"},
+     {tag:"顺着聊",tx:"是什么糖？下次我买一整袋给你。",m:"pref",d:[-3,3,5,2,4],r:"真的吗！那我要那种橘子味的。你记好了哦。"}]},
+{t:"share",s:"她突然提起你很久以前随口说过的一句话。",q:"你还记不记得，开学第一周你说我笑起来眼睛会弯。我一直记着这句",
+ o:[{tag:"记得并补一句",tx:"记得。现在也是，你一笑眼睛就弯，这事儿一年也没变。",m:"pref",d:[-4,4,6,5,6],r:"……你居然真的记得。我还以为只有我一个人在记这些。"},
+     {tag:"含糊过去",tx:"啊……有说过吗，不太记得了。",m:"perf",d:[5,-4,-5,-5,-5],r:"（沉默了一下）没事，是我记太久了而已。"}]},
+/* ---------- 敏感试探 probe ---------- */
+{t:"probe",s:"你们聊得正好，她忽然话锋一转。",q:"你是不是也这样跟别人说话啊",
+ o:[{tag:"坚定给偏爱",tx:"不一样。别人我是礼貌，你是我愿意把时间花在上面的人。",m:"pref",d:[-5,4,5,5,7],r:"……真的吗。那你以后也只对我这样好不好。"},
+     {tag:"讲公平",tx:"我对谁都挺好的啊，这不是挺正常的吗。",m:"lect",d:[7,-6,-6,-6,-7],r:"哦。我知道了。是我自作多情。"},
+     {tag:"反问调侃",tx:"你猜？",m:"neu",d:[2,-1,-1,-1,0],r:"……我不想猜。你就不能好好回答我一次吗。"}]},
+{t:"probe",s:"她不小心瞄到你手机上给另一个人的备注，是一个很亲近的小名。",q:"……你给她起的备注，比我的还可爱",
+ o:[{tag:"立刻改她的备注给她看",tx:"（当场把她的备注改成只有你们俩懂的那个词）现在这个，别人看不懂。",m:"pref",d:[-6,5,7,5,9],r:"……（很久）你干嘛突然这样。我眼睛有点酸。只有我们俩懂，对吧。"},
+     {tag:"解释备注来源",tx:"那是同学之间的外号，没什么意思。",m:"neu",d:[3,-2,-2,-1,-2],r:"嗯。我知道了。（但她明显还在想这件事）"},
+     {tag:"觉得她小题大做",tx:"一个备注而已，你想太多了吧。",m:"lect",d:[9,-8,-8,-7,-8],r:"对，我想太多。我每次都想太多。行了吧。"}]},
+{t:"probe",s:"她突然很小声地问。",q:"如果我一直这么麻烦，你会不会哪天就不想理我了",
+ o:[{tag:"给确定性",tx:"不会。而且你不是麻烦——是你一直觉得自己是麻烦，这件事才让我难受。",m:"pref",d:[-7,6,6,7,7],r:"……你别对我这么好。我会越来越离不开你的。"},
+     {tag:"开玩笑带过",tx:"会啊，你再闹我就不理你了（笑）。",m:"perf",d:[6,-6,-6,-5,-5],r:"（她也笑了一下）……嗯，我就知道。"},
+     {tag:"讲道理",tx:"这得看你自己改不改，一直这样谁都受不了。",m:"lect",d:[11,-9,-9,-9,-9],r:"……所以你其实已经受不了了。"}]},
+{t:"probe",s:"你今天回消息慢了两小时。",q:"你今天回我好慢哦。在忙什么呀",
+ o:[{tag:"说清楚并主动补",tx:"在开会，手机扣着的。现在补上——你上午那条我一条条回。",m:"pref",d:[-4,3,4,4,4],r:"……好。那我等你回完。"},
+     {tag:"简单带过",tx:"有点事。",m:"perf",d:[5,-4,-4,-4,-4],r:"哦。"},
+     {tag:"反问",tx:"两小时也算慢吗。",m:"lect",d:[8,-7,-7,-6,-6],r:"……对，不算。是我太计较了。"}]},
+{t:"probe",s:"她刷到你和别人的合照。",q:"你最近是不是认识了新朋友呀。看起来你们玩得挺好的",
+ o:[{tag:"坦白并划线",tx:"认识了几个，但那是一起做事的关系。能让我半夜爬起来回消息的，只有你一个。",m:"pref",d:[-5,4,5,5,7],r:"……那你记住你说的话。我会记很久的。"},
+     {tag:"模糊回答",tx:"还好吧，就普通朋友。",m:"neu",d:[3,-2,-2,-2,-2],r:"嗯。普通朋友。（她重复了一遍）"},
+     {tag:"夸对方",tx:"对啊，他们人都挺好的，你应该也会喜欢。",m:"perf",d:[7,-5,-6,-4,-6],r:"……我不喜欢。我为什么要喜欢。"}]},
+{t:"probe",s:"深夜，她发了很长一段又删掉，最后只留下一句。",q:"我是不是你最特别的那一个",
+ o:[{tag:"直接给答案",tx:"是。不用加前提，也不用比较，就是是。",m:"pref",d:[-7,6,7,6,9],r:"……你为什么回得这么快。我都准备好你犹豫了。"},
+     {tag:"说每个人都特别",tx:"每个朋友都有自己的特别之处啊。",m:"lect",d:[10,-9,-8,-8,-10],r:"（撤回了一条消息）当我没问过。"},
+     {tag:"开玩笑",tx:"你说呢～",m:"perf",d:[5,-4,-5,-3,-4],r:"我不知道，所以我才问你。"}]},
+{t:"probe",s:"她忽然复述了你三周前随口答应她的一件事。",q:"你那天说，等忙完了要陪我去那家店。你还记得吗",
+ o:[{tag:"记得并定时间",tx:"记得。这周六下午，我已经空出来了，你别排别的事。",m:"pref",d:[-6,5,7,6,7],r:"……我本来以为你早忘了。我还偷偷算了多少天。"},
+     {tag:"想起来但推后",tx:"啊对，最近太忙了，过阵子吧。",m:"perf",d:[6,-5,-5,-5,-5],r:"“过阵子”。好啊。"},
+     {tag:"完全忘了",tx:"我说过吗？",m:"perf",d:[9,-8,-8,-8,-8],r:"……没有。可能是我记错了。"}]},
+{t:"probe",s:"她试探地问。",q:"你会不会有时候觉得我很烦啊，特别是我一直找你说话的时候",
+ o:[{tag:"反向需要她",tx:"不烦。反过来说——你要是哪天不找我了，我才会觉得不对劲。",m:"pref",d:[-6,5,6,6,6],r:"（很长的沉默）……你知不知道这句话对我来说有多重。"},
+     {tag:"客气安慰",tx:"不会啦，别想那么多。",m:"perf",d:[3,-2,-3,-2,-2],r:"嗯。（她没信）"},
+     {tag:"诚实说有时候",tx:"偶尔会累，但累不等于不想理你。",m:"emp",d:[2,-1,-2,2,-1],r:"……至少你是认真回答的。我能接受这个答案。"}]},
+{t:"probe",s:"她把一个很直白的问题丢过来。",q:"我和别人同时找你，你会先回谁",
+ o:[{tag:"毫不犹豫",tx:"你。这个不需要想。",m:"pref",d:[-5,5,6,5,8],r:"……哼。那你最好说到做到。"},
+     {tag:"看情况",tx:"看谁的事更急吧，这不是挺合理的。",m:"lect",d:[9,-8,-8,-7,-9],r:"合理。你永远都很合理。"},
+     {tag:"反问她",tx:"你希望我先回谁？",m:"neu",d:[3,-2,-2,-1,-1],r:"……我希望你不用问就知道。"}]},
+{t:"probe",s:"她装得很随意地问起你昨晚的事。",q:"你昨天半夜还在线哦，是在跟谁聊天吗",
+ o:[{tag:"坦然说明",tx:"在赶东西。你要是那会儿发消息，我肯定秒回。",m:"pref",d:[-3,3,4,4,4],r:"……早知道我就发了。我盯着那个在线看了好久。"},
+     {tag:"敷衍",tx:"没谁啊。",m:"perf",d:[5,-4,-4,-5,-4],r:"哦。那没事了。"}]},
+/* ---------- 炸毛冲突 blow ---------- */
+{t:"blow",s:"你开了一个很普通的玩笑，她的语气瞬间就冷了。",q:"你是不是觉得我很好笑。你们是不是背地里都这么说我",
+ o:[{tag:"立刻收回并道歉",tx:"对不起，这个玩笑不好笑，是我没分寸。我收回。",m:"emp",d:[-5,6,4,5,4],r:"……（很久）算了。我今天状态不好，不全是你的错。"},
+     {tag:"解释没有恶意",tx:"我只是开个玩笑，你别这么敏感。",m:"lect",d:[10,-9,-8,-8,-7],r:"对，我敏感。我有病。行了吧。"},
+     {tag:"反击",tx:"你今天是不是火气有点大。",m:"lect",d:[12,-11,-10,-9,-8],r:"是啊我火气大，那你别理我啊。"}]},
+{t:"blow",s:"她等了你一下午的回复，最后只发来三个字。",q:"算了，没事",
+ o:[{tag:"不接受“没事”",tx:"不是没事。你等了多久，说出来，我听着。",m:"emp",d:[-6,6,5,6,5],r:"……四个小时。我刷新了很多次。我知道你忙，可我就是会难受。"},
+     {tag:"顺着台阶下",tx:"那就好，我还以为你生气了。",m:"perf",d:[8,-7,-7,-6,-6],r:"嗯，没生气。（她当然生气了）"},
+     {tag:"道歉但不追问",tx:"抱歉让你等了。",m:"neu",d:[2,-1,-1,1,0],r:"……嗯。"}]},
+{t:"blow",s:"她今天在外面受了气，回来对着你发火。",q:"你能不能别一直问我！我说了我没事！",
+ o:[{tag:"退一步但不走",tx:"好，我不问了。我在这儿，你什么时候想说都行。",m:"emp",d:[-6,7,3,6,4],r:"……（十分钟后）对不起。不是冲你的。你别走。"},
+     {tag:"继续追问",tx:"你到底怎么了，你能不能说清楚。",m:"lect",d:[11,-9,-8,-7,-5],r:"连难过都要被你审问一遍是吧！"},
+     {tag:"也生气",tx:"我关心你还有错了。",m:"lect",d:[13,-12,-11,-10,-9],r:"……对，是我错了。我总是错的那个。"}]},
+{t:"blow",s:"吵到一半，她说了一句明显是想伤人的话。",q:"你根本就没那么在乎我。你只是不好意思不理我而已",
+ o:[{tag:"不回击，接住",tx:"你现在很难受，所以想说点狠的。说吧。但这句不是真的，我不接受。",m:"emp",d:[-7,8,4,7,6],r:"……（哭了）我是故意的。我就是想看你会不会走。对不起。"},
+     {tag:"冷处理",tx:"你先冷静一下，等你好了我们再说。",m:"lect",d:[12,-10,-9,-9,-8],r:"“冷静”。每次都是这句。那你冷静吧。"},
+     {tag:"反驳",tx:"我哪里不在乎你了？你自己想想我做了多少。",m:"lect",d:[14,-12,-11,-11,-10],r:"所以你是在跟我算账。"}]},
+{t:"blow",s:"她一句“你别管我了”之后就不说话了。",q:"你别管我了",
+ o:[{tag:"偏不走",tx:"不行。我就管。你现在把我赶走，等会儿后悔的是你。",m:"pref",d:[-6,6,5,6,6],r:"……你怎么知道我会后悔。（声音软了）"},
+     {tag:"给空间",tx:"那我先不打扰，但我一直在。",m:"emp",d:[-1,2,0,3,1],r:"嗯。……别走太远。"},
+     {tag:"真的不管",tx:"好，那你自己待会儿吧。",m:"perf",d:[10,-9,-9,-8,-9],r:"……你真的就这么走了。"}]},
+{t:"blow",s:"你在一件事上帮别人说了句公道话。",q:"你为什么要帮她说话。你到底站哪边",
+ o:[{tag:"明确站她",tx:"我站你。道理归道理，但你受委屈的时候，我只站你这边。",m:"pref",d:[-6,6,6,6,8],r:"……（吸鼻子）你早说啊。我刚才都准备好跟你吵一架了。"},
+     {tag:"中立调和",tx:"其实你们俩都有不对的地方。",m:"lect",d:[11,-10,-9,-10,-9],r:"（打上了裂痕的语气）原来连你都这样。"},
+     {tag:"先安抚再说事",tx:"我不是帮她。先说你，你受委屈了，这个最要紧。",m:"emp",d:[-3,4,3,4,4],r:"……嗯。那你刚才那句话不许再说了。"}]},
+{t:"blow",s:"她觉得你今天所有的回复都像在应付。",q:"你是不是在敷衍我。你今天一句话都没超过五个字",
+ o:[{tag:"承认并补救",tx:"是。我今天状态差，但这不是理由。重来一次，你刚才说到哪儿。",m:"emp",d:[-4,5,4,5,4],r:"……你能承认，我就不气了。那我重新讲一遍哦。"},
+     {tag:"否认",tx:"没有啊，我一直在听。",m:"perf",d:[8,-7,-7,-7,-6],r:"那你复述一遍我刚才说了什么。"},
+     {tag:"说自己很累",tx:"我今天真的很累，你体谅一下。",m:"neu",d:[3,-2,-3,0,-2],r:"……好。那你休息吧。（她把想说的话咽了回去）"}]},
+{t:"blow",s:"她开始翻旧账，把两周前的一件小事又拿出来说。",q:"上次你也是这样。你每次都这样",
+ o:[{tag:"认真对待旧账",tx:"上次那件事我确实没处理好。你一直记到现在，说明它真的伤到你了。",m:"emp",d:[-6,7,5,6,5],r:"……你不觉得我烦吗。我自己都觉得我烦。"},
+     {tag:"嫌她翻旧账",tx:"都过去那么久了还提。",m:"lect",d:[11,-10,-9,-9,-8],r:"对我来说没过去。一直都没过去。"}]},
+/* ---------- 深夜emo ---------- */
+{t:"emo",s:"凌晨两点十七分。",q:"睡不着",
+ o:[{tag:"陪着",tx:"我也醒着。要不要我陪你把这一个小时熬过去。",m:"pref",d:[-7,5,5,5,6],r:"……好。你不用说话，你在就行。"},
+     {tag:"劝她睡",tx:"这么晚了快睡吧，熬夜不好。",m:"lect",d:[7,-6,-5,-5,-4],r:"嗯。知道了。晚安。"},
+     {tag:"问原因",tx:"是心里有事，还是单纯睡不着。",m:"emp",d:[-3,3,2,4,2],r:"……有事。但我不知道怎么说。你别急，让我想想怎么讲。"}]},
+{t:"emo",s:"她整整一天没主动发消息，回复也只有一两个字。",q:"嗯",
+ o:[{tag:"不逼问，只报到",tx:"我今天看了一部挺烂的电影，想起你肯定会吐槽。不用回我，我就说一声。",m:"pref",d:[-6,5,4,6,5],r:"……（晚上十一点）那部电影叫什么。我想看看有多烂。"},
+     {tag:"连环追问",tx:"你怎么了？是不是我哪里做错了？你说话啊。",m:"lect",d:[9,-8,-7,-6,-4],r:"没有。真的没有。我就是不想说话，这也不行吗。"},
+     {tag:"也不理她",tx:"（也不说话，等她先开口）",m:"perf",d:[8,-7,-8,-7,-7],r:"（三天后她才重新开口，语气客气了很多）"}]},
+{t:"emo",s:"她发来一长段自我否定。",q:"我真的觉得我性格很差。没有人会愿意长期忍受我这种人的",
+ o:[{tag:"否定“忍受”这个词",tx:"停。没有人在“忍受”你。我跟你相处是因为我愿意，不是因为我忍得住。",m:"pref",d:[-8,7,6,7,8],r:"……（很久很久）为什么你每次都能说到那个点上。我现在很想哭。"},
+     {tag:"安慰但空洞",tx:"别这么想，你挺好的。",m:"perf",d:[4,-3,-4,-3,-3],r:"你只是在安慰我而已。"},
+     {tag:"建议她改",tx:"那你也可以试着改改脾气，对你自己也好。",m:"lect",d:[12,-10,-10,-11,-9],r:"……果然。连你也觉得我该改。"}]},
+{t:"emo",s:"她把自己的一条动态删了，然后跟你说。",q:"我刚发了条东西，发完就后悔了，觉得自己好矫情，就删了",
+ o:[{tag:"给她重新说一遍的机会",tx:"那条我没来得及看。你在这儿跟我说一遍，这里不用删。",m:"pref",d:[-6,5,5,6,5],r:"……在你这儿真的不用删吗。那我说了哦。"},
+     {tag:"说删得对",tx:"删了也好，免得别人乱想。",m:"lect",d:[8,-7,-6,-6,-5],r:"嗯。你说得对。"}]},
+{t:"emo",s:"她突然问了一句很轻的话。",q:"你说，一个人要是情绪这么多，是不是注定留不住谁",
+ o:[{tag:"把她的需求正当化",tx:"情绪多不等于留不住人。你的需求值得被认真对待，这件事不需要你道歉。",m:"pref",d:[-8,7,6,8,7],r:"……从来没有人跟我说过这句话。我一直以为是我有问题。"},
+     {tag:"模糊回答",tx:"也不一定吧，看人。",m:"perf",d:[5,-4,-4,-4,-4],r:"嗯。看人。那大概率是留不住的意思。"}]},
+{t:"emo",s:"今天好像什么都不顺，她的语气很平。",q:"今天好像谁都不需要我",
+ o:[{tag:"说你需要她",tx:"我需要。今天我有件事只想讲给你听，一直在等你有空。",m:"pref",d:[-7,6,7,6,7],r:"……真的吗。那你快讲。我现在就有空。"},
+     {tag:"泛泛鼓励",tx:"怎么会呢，大家都挺在乎你的。",m:"perf",d:[5,-4,-5,-4,-4],r:"“大家”。那你呢。"}]},
+{t:"emo",s:"她在深夜承认了一件事。",q:"我有时候很讨厌我自己。尤其是闹完脾气以后",
+ o:[{tag:"接住愧疚",tx:"闹完之后最难受的是你自己，这个我知道。你不用再惩罚自己一遍了。",m:"emp",d:[-8,7,5,8,6],r:"……你怎么会知道。我以为只有我一个人在半夜想这些。"},
+     {tag:"趁机教育",tx:"所以你下次就控制一下嘛。",m:"lect",d:[11,-10,-9,-10,-8],r:"……我在跟你说我难受，你在跟我讲方法。"}]},
+{t:"emo",s:"她问得小心翼翼。",q:"像我这样的人，会被长期喜欢吗",
+ o:[{tag:"给长期的承诺",tx:"会。而且不是“像你这样的人”，是你。我已经在这儿很久了，不是吗。",m:"pref",d:[-8,7,7,8,9],r:"……你别骗我。我会当真的，我真的会当真。"},
+     {tag:"打太极",tx:"这个谁说得准呢。",m:"perf",d:[7,-6,-6,-6,-7],r:"嗯。是啊。谁说得准。"}]},
+/* ---------- 中性日常 ---------- */
+{t:"daily",s:"下午三点，她发来一句日常。",q:"你吃饭了吗",
+ o:[{tag:"反问并关心",tx:"吃了。你呢，别又拿零食糊弄过去。",m:"pref",d:[-3,2,3,2,2],r:"……被你说中了。好吧，我去吃点正经的。"},
+     {tag:"简单回答",tx:"吃了。",m:"neu",d:[1,0,0,0,-1],r:"哦。"}]},
+{t:"daily",s:"她在看一个综艺，边看边给你转播。",q:"这期也太好笑了，你看了吗",
+ o:[{tag:"陪看",tx:"没看，你一边看一边讲给我听吧，我跟着你的进度。",m:"pref",d:[-3,3,4,2,3],r:"好！那我从第一个环节开始讲！"},
+     {tag:"说没空",tx:"最近没时间看综艺。",m:"neu",d:[2,-1,-2,-1,-1],r:"哦，那好吧。"}]},
+{t:"daily",s:"周四晚上，她问你周末的安排。",q:"你这周末有事吗",
+ o:[{tag:"把时间留给她",tx:"本来没定。你要是想出去，我就把周末空出来。",m:"pref",d:[-4,3,5,3,4],r:"（秒回）那我现在就开始想去哪！"},
+     {tag:"说要看看",tx:"还不确定，到时候看。",m:"perf",d:[4,-3,-4,-3,-3],r:"……好。那我不打扰你了。"}]},
+{t:"daily",s:"她拍了窗外的雨。",q:"下雨了。你那边下了吗",
+ o:[{tag:"顺着聊",tx:"这边也在下。你是不是又没带伞。",m:"pref",d:[-3,2,3,3,2],r:"……你怎么知道。我站在便利店门口等雨停。"},
+     {tag:"只回事实",tx:"没下。",m:"neu",d:[1,0,-1,0,0],r:"哦。"}]},
+{t:"daily",s:"她被一道题卡住了。",q:"这道题我算了三遍都不对，你帮我看看",
+ o:[{tag:"陪她一步步做",tx:"你先把你的思路讲一遍，我跟着你走，看卡在哪。",m:"emp",d:[-3,3,3,4,2],r:"（讲到一半自己发现了）啊！我知道错哪了！跟你讲话真的会变聪明。"},
+     {tag:"直接给答案",tx:"答案是C。",m:"neu",d:[1,0,0,0,-1],r:"……好吧，谢谢。"}]},
+{t:"daily",s:"她发来两张衣服的照片。",q:"这两件你觉得哪件好看",
+ o:[{tag:"认真选并说理由",tx:"左边。领口那条线更衬你的脸型，右边那件颜色压你。",m:"pref",d:[-3,3,4,3,3],r:"你讲得好专业哦。那就左边！"},
+     {tag:"都行",tx:"都挺好的。",m:"perf",d:[3,-2,-3,-2,-2],r:"你这等于没说。"}]},
+{t:"daily",s:"她昨晚又熬到三点。",q:"我决定了，今天一定早睡。十一点准时",
+ o:[{tag:"温和地陪她执行",tx:"好。十点五十我提醒你一次，别到时候又说“再看五分钟”。",m:"pref",d:[-4,3,4,3,3],r:"……被你猜到了。好啦，那就这么说定了。"},
+     {tag:"冷嘲",tx:"你每次都这么说。",m:"perf",d:[4,-3,-4,-2,-2],r:"……这次真的会。你等着看。"}]},
+{t:"daily",s:"她出门前给你报备。",q:"我出门啦，去书店，大概两个小时回来",
+ o:[{tag:"接住这份报备",tx:"好。回来跟我说一声，顺便告诉我你翻了哪几本。",m:"pref",d:[-3,3,4,3,3],r:"嗯！我会拍给你看的。"},
+     {tag:"不置可否",tx:"嗯。",m:"perf",d:[3,-2,-3,-2,-2],r:"……哦。（她其实想让你说一句注意安全）"}]},
+/* ---------- 高危雷区 ---------- */
+{t:"mine",s:"她生理期第二天，脸色很差，但还是回了你的消息。",q:"我今天肚子好痛，而且特别烦，看什么都不顺眼",
+ o:[{tag:"具体照顾",tx:"红糖水别喝了没什么用，你去把热水袋找出来贴腰上。今天别写作业了，我帮你跟同学说一声。",m:"pref",d:[-8,6,6,6,7],r:"……你怎么连这个都知道。（声音软下来）我现在就去找。"},
+     {tag:"多喝热水",tx:"多喝热水，忍忍就过去了。",m:"perf",d:[10,-9,-8,-7,-7],r:"……你跟别人说的一模一样。算了。"},
+     {tag:"关心但不具体",tx:"那你好好休息。",m:"neu",d:[3,-2,-2,-1,-2],r:"嗯。"}]},
+{t:"mine",s:"有人在你面前说她的坏话，说她太难搞、谁跟她做朋友谁累。",q:"（她不知道这件事，但你知道她迟早会知道）",
+ o:[{tag:"当场反驳",tx:"（当场打断）她不是难搞，是她把真实的一面给了她信任的人。这话别再说了。",m:"pref",d:[-5,5,5,8,8],r:"（她后来从别人那儿听说了这件事）……你当时真的那么说了？（很久）谢谢你。"},
+     {tag:"沉默不表态",tx:"（没说话，也没附和）",m:"neu",d:[4,-2,-3,-3,-3],r:"（她听说了，语气很淡）你当时在场对吧。嗯，没事。"},
+     {tag:"附和一句",tx:"她确实有时候情绪是多了点。",m:"lect",d:[14,-13,-12,-15,-14],r:"……原来你私下是这么说我的。"}]},
+{t:"mine",s:"另一个朋友临时约你，时间正好和你答应她的那件事冲突。",q:"（她刚刚还在念叨今天的安排）",
+ o:[{tag:"推掉别人",tx:"（回复对方：今天不行，有约了）",m:"pref",d:[-5,5,6,5,8],r:"你是不是推了什么事。……我听见你电话了。你干嘛这样啊。（但很高兴）"},
+     {tag:"跟她商量改期",tx:"（先问她：今天能不能挪到明天，我跟你说明原因）",m:"emp",d:[2,-1,-2,2,-1],r:"……你问我了，所以我不好发脾气。明天就明天吧。"},
+     {tag:"先答应别人",tx:"（答应了对方，事后再跟她解释）",m:"perf",d:[12,-11,-11,-10,-12],r:"所以我是可以被挪开的那个。我知道了。"}]},
+{t:"mine",s:"她发现你跟另一个人聊天时，用了和对她一样的语气和表情包。",q:"你跟她说话，跟跟我说话……一模一样",
+ o:[{tag:"给出不可复制的东西",tx:"表情包是一样的。但我只跟你讲我那些没出息的事，这个她不知道。",m:"pref",d:[-6,5,6,6,8],r:"……（停了很久）那你以后也只讲给我听。答应我。"},
+     {tag:"说这很正常",tx:"聊天语气都差不多吧，这很正常。",m:"lect",d:[11,-10,-10,-9,-11],r:"正常。嗯。"}]},
+{t:"mine",s:"她听到有人议论她和你走得太近、太黏人。",q:"别人说我们太黏了。你……会不会也这么觉得",
+ o:[{tag:"不在乎外界",tx:"别人怎么觉得不重要。我们俩觉得舒服，这事就只跟我们俩有关。",m:"pref",d:[-6,6,6,7,8],r:"……那你以后被人说了，也不许嫌我。"},
+     {tag:"有点顾虑",tx:"要不我们最近稍微注意一点？",m:"perf",d:[10,-9,-9,-9,-10],r:"所以你也觉得丢人。我懂了。"}]},
+{t:"mine",s:"她明显在忍，说话的声音比平时低，但一直没发火。",q:"没事。真的没事。我没生气",
+ o:[{tag:"点破并允许她生气",tx:"你可以生气的。在我这儿不用忍，忍下去的那些最后都会变成你自己扛。",m:"pref",d:[-8,8,5,7,7],r:"……（终于哭出来）我忍了一下午。我怕我一开口你就烦了。"},
+     {tag:"接受她的说法",tx:"那就好。",m:"perf",d:[9,-8,-8,-7,-7],r:"嗯。（她把所有情绪都压了回去）"},
+     {tag:"夸她懂事",tx:"你今天好像成熟了很多，没发脾气。",m:"lect",d:[8,-7,-7,-6,-6],r:"……所以我以前都很不懂事是吗。"}]},
+{t:"mine",s:"她失眠加头疼，第二天状态极差，你随口一句话就点燃了她。",q:"你刚才那句什么意思！你是不是嫌我烦了！",
+ o:[{tag:"先处理身体再处理情绪",tx:"我不是那个意思。但先别吵——你头还疼吗，药吃了没。这个先解决。",m:"pref",d:[-7,7,4,6,6],r:"……（声音一下子垮了）没吃。我找不到药在哪儿。我好难受。"},
+     {tag:"解释句子本意",tx:"我那句话的意思是……你听我解释逻辑。",m:"lect",d:[10,-9,-8,-7,-6],r:"我不想听逻辑！"},
+     {tag:"退让但冷淡",tx:"行，是我说错了，你别激动。",m:"perf",d:[9,-8,-8,-8,-7],r:"你根本就不觉得自己错了。"}]},
+{t:"mine",s:"有另一个人对你表现出明显的亲近，她看在眼里。",q:"她好像挺喜欢你的。你们……挺合得来的吧",
+ o:[{tag:"主动划清并安抚",tx:"合不合得来我不知道，我只知道我把时间花在哪儿是我自己选的。我选你。",m:"pref",d:[-6,6,6,6,9],r:"……（很小声）那你别让我等太久。我很容易胡思乱想。"},
+     {tag:"含糊其辞",tx:"还好吧，没想那么多。",m:"perf",d:[9,-7,-8,-7,-9],r:"“没想那么多”。那你慢慢想吧。"}]}
+];
+
+/* ============ 可主动发起互动 ============ */
+const ACTS=[
+{id:"qinghua",n:"15秒土味情话",c:s=>s.A.l>=60,cd:"爱意 ≥60",
+ i:"你说给你十五秒，讲个土味情话。她把手机凑到耳边，一脸“我倒要看看”。",
+ q:"……行啊。你说。我要是没被土到，你就输了。",
+ qa:[
+ {ask:"你知道我手机里置顶只有一个人吗？",
+  her:"……不知道啊。谁啊。（她的语气明显紧了一下）",
+  hit:[{tx:"你自己翻。从你第一次半夜两点找我那天置顶的，到今天没动过。",m:"pref",d:[-6,5,9,5,9],r:"（真的去翻了，翻到之后很久没说话）……你连哪天都记得。好啦我输了，我被土到了。"},
+       {tx:"是你啊笨蛋～",m:"perf",d:[2,-1,0,-1,-1],r:"……这句我在十个人的朋友圈里见过。重来。"},
+       {tx:"猜不到就算了。",m:"perf",d:[4,-3,-4,-2,-3],r:"……那你干嘛要问我。"}]},
+ {ask:"你猜我今天走了多少步？",
+  her:"不知道，几千吧。……你问这个干嘛，这跟情话有什么关系。",
+  hit:[{tx:"八千三。其中有两千步是绕路去看你上次说想吃的那家店开门没有。",m:"pref",d:[-7,5,10,6,10],r:"……（声音一下子小了）那家店我就随口提过一次。你绕路干嘛啊。……土死了。但你明天还绕吗。"},
+       {tx:"因为我一直在你心里走来走去。",m:"neu",d:[-2,1,3,0,1],r:"（笑出声）好油。扣分。但是……再说一个。"},
+       {tx:"记不清了，随便问问。",m:"perf",d:[3,-2,-3,-2,-3],r:"……你连自己的梗都接不住。"}]},
+ {ask:"你有没有发现，我回消息有个毛病。",
+  her:"什么毛病。你说。（她坐直了）",
+  hit:[{tx:"别人的消息我会攒着一起回，只有你的，我一条一条回。这毛病改不掉了。",m:"pref",d:[-6,5,9,7,9],r:"……（很久）我一直以为是我自己多想。原来是真的。你别改。"},
+       {tx:"毛病就是一看见是你，手就比脑子快。",m:"pref",d:[-4,3,7,4,6],r:"（耳朵红了）那你手慢一点会死吗。……不会，你别慢。"},
+       {tx:"算了，没什么。",m:"perf",d:[4,-3,-4,-3,-3],r:"……说一半。你最讨厌了。"}]}]},
+{id:"fan",n:"约她出门吃饭",c:s=>s.A.m>=55,cd:"心情 ≥55",
+ i:"你约她出来吃饭。她比约定时间早到了二十分钟，站在店门口假装刚到。",
+ q:"我也是刚到啦。……你今天怎么突然想约我。",
+ o:[{tx:"没什么突然的。上次听你说想吃这家，我就记下了。",m:"pref",d:[-7,5,8,6,8],r:"（愣住）我就提过一次……你记这种事干嘛啊。（耳朵红了）"},
+    {tx:"随便找个由头见你一面。",m:"pref",d:[-5,4,7,4,6],r:"……原来还需要由头啊。以后不用了，你直接说想见我就行。"},
+    {tx:"正好路过，就顺便叫你。",m:"perf",d:[3,-2,-3,-3,-4],r:"哦，顺便啊。那我真是赶巧了。"}]},
+{id:"faidai",n:"安静陪她发呆",c:s=>s.A.p>=65,cd:"心理压力 ≥65",
+ i:"她什么也不想说。你没有问，只是坐在旁边，把手机屏幕朝下扣着。",
+ q:"……（她看了你一眼，又低下头）",
+ o:[{tx:"（不说话，陪她坐着，直到她自己开口）",m:"emp",d:[-14,8,4,7,5],r:"（四十分钟后）……谢谢你没问我怎么了。今天所有人都在问我怎么了。"},
+    {tx:"我不走，你什么时候想说都行。",m:"pref",d:[-11,7,4,6,5],r:"嗯。……你再陪我坐一会儿。"},
+    {tx:"要不你说点什么，憋着不好。",m:"lect",d:[5,-4,-4,-4,-3],r:"我现在一个字都不想说。"}]},
+{id:"kua",n:"认真夸夸专场",c:s=>s.A.t>=60,cd:"信任 ≥60",
+ i:"你说今天要专门夸她十分钟，不许打断。她嘴上说无聊，手已经按下了录音。",
+ q:"……那你夸吧。我听着呢。（偷偷录音）",
+ o:[{tx:"你难过的时候还会先问别人今天怎么样，这件事我见过三次。",m:"pref",d:[-8,6,9,7,7],r:"……你连这个都记得。（声音抖了）我以为没人看得见。"},
+    {tx:"你对想做好的事从来不糊弄，哪怕没人看。",m:"pref",d:[-7,6,8,6,6],r:"（很小声）你是第一个说我认真的人。大家都只说我情绪多。"},
+    {tx:"你人很好，真的，特别好。",m:"perf",d:[2,-1,-1,-2,-1],r:"……就这？你刚才说要夸十分钟的。"}]},
+{id:"tucao",n:"听她吐槽倾诉",c:s=>s.A.e<=40,cd:"情绪值 ≤40",
+ i:"你说：今天不讲道理，你骂，我听。她愣了两秒，然后一口气说了四十分钟。",
+ q:"……我是不是说太多了。你会不会觉得我特别负能量。",
+ o:[{tx:"不会。你说完没有？没说完继续。",m:"emp",d:[-12,11,6,8,6],r:"……（哽咽）还有。还有好多。你真的要听吗。"},
+    {tx:"听完了。你一个人扛这些，挺辛苦的。",m:"emp",d:[-10,9,5,7,5],r:"（哭了）我不知道原来被人说一句辛苦，是这种感觉。"},
+    {tx:"其实你可以换个角度想，这事也没那么糟。",m:"lect",d:[8,-9,-7,-11,-9],r:"……我就知道。最后还是会变成教我做人。"}]},
+{id:"xi",n:"专属小惊喜",c:s=>s.A.l>=75,cd:"爱意 ≥75",
+ i:"你提前准备了东西，没提前说。",
+ q:"……你藏在背后的是什么啊。",
+ o:[{tx:"（一张手写纸条，上面是你记下的、她今年说过的十句话）",m:"pref",d:[-12,8,12,9,12],r:"……（看到第三句就不说话了）你从什么时候开始记的。……你有病啊。（然后哭了很久）"},
+    {tx:"（她提过一次的那家店的橘子味软糖，整整一袋）",m:"pref",d:[-9,6,11,7,10],r:"我就随口说过一次！！你居然真的买了整袋！"},
+    {tx:"（她喜欢的那种黄昏，你每天拍一张，攒了三十天）",m:"pref",d:[-10,7,12,8,11],r:"三十张……你每天都在想着我吗。（她一张一张翻，翻了很久）"}]},
+{id:"tanxin",n:"深夜谈心",c:s=>s.A.t>=72&&s.H.acc>=30,cd:"信任 ≥72 · ???",
+ i:"凌晨一点。她说有件事她从来没跟任何人讲过。",
+ q:"……你听了之后，不许觉得我奇怪。",
+ o:[{tx:"（安静听完，然后说）谢谢你愿意告诉我。这不奇怪，这只是你。",m:"emp",d:[-13,9,7,10,8],r:"……说出来之后，好像没有我想的那么可怕。",acc:9},
+    {tx:"（听完，先问）你讲这些的时候，自己难受吗。",m:"emp",d:[-11,8,6,9,7],r:"难受。但是是那种……终于有人问我的难受。",acc:8},
+    {tx:"（听完）其实这事你当时可以这样处理。",m:"lect",d:[9,-9,-8,-12,-9],r:"……我不是来找解决方案的。算了，我不该讲的。",acc:-6}]},
+{id:"ge",n:"一起放空听歌",c:s=>s.A.m>=65,cd:"心情 ≥65",
+ i:"一人一只耳机，谁也不说话，一首接一首地听。",
+ q:"（她晃着腿，过了很久才说）这样挺好的。",
+ o:[{tx:"嗯。不用说话也不尴尬，这种人不多。",m:"pref",d:[-8,5,5,5,5],r:"……我也是。跟别人一起我会一直想找话说，跟你就不用。"},
+    {tx:"下一首我来选，你肯定会喜欢。",m:"pref",d:[-6,4,6,4,4],r:"（听完）……你怎么知道我喜欢这种。你是不是研究过我的歌单。"}]},
+{id:"chengyao",n:"帮她撑腰",c:s=>s.A.t>=65,cd:"信任 ≥65",
+ i:"她和别人起了冲突，回来的时候眼睛是红的。",
+ q:"……他们说是我先不对的。是不是真的是我的问题。",
+ o:[{tx:"我不管谁先不对。你现在难受，所以这事我站你。",m:"pref",d:[-11,8,7,10,11],r:"……（一下子绷不住）我等这句话等了一整天。"},
+    {tx:"（直接去跟对方说清楚）这事别再提她了。",m:"pref",d:[-9,7,8,9,10],r:"你干嘛去啊！……（但她没拦）谢谢。真的。"},
+    {tx:"客观说，你们俩都有点问题。",m:"lect",d:[12,-12,-11,-13,-12],r:"你跟他们站一边。我明白了。"}]},
+{id:"hongshui",n:"哄睡碎碎念",c:s=>s.A.l>=80,cd:"爱意 ≥80 · 夜间",
+ i:"她说睡不着。你打了语音过去，开始讲一些毫无营养的废话。",
+ q:"你讲吧。讲到我睡着为止。",
+ o:[{tx:"（从今天早上的第一杯水开始，一件件讲给她听，直到她呼吸变匀）",m:"pref",d:[-16,9,8,7,8],r:"（第二天）……你昨天讲到便利店那个就没声了。我是不是先睡着了。谢谢你。"},
+    {tx:"（讲你们认识以来的事，一件一件）",m:"pref",d:[-14,8,9,8,9],r:"（很小声）你居然记得这么多。……你别停，我还没睡着。"}]}
+];
+
+/* ============ 长线/节点 剧情 ============ */
+const ST={
+anni:(n)=>({b:"v",bt:"✨ 支线D · 她心里悄悄在意的日子",s:"她今天异常安静，一直在等什么，但一句也没提。日历上是第"+n+"天。",q:"……今天没什么特别的。你忙你的。",
+ o:[{tag:"主动点破",tx:"今天是我们认识的第"+n+"天。我记着呢。",m:"pref",d:[-9,7,12,8,13],r:"……（眼眶一下就红了）你怎么连这个都算。我以为只有我一个人在数。"},
+    {tag:"隐约察觉",tx:"你今天怪怪的，是不是有什么日子？",m:"emp",d:[-3,3,4,3,3],r:"……算了，你能发现我不对劲就已经不错了。"},
+    {tag:"没察觉",tx:"好，那我先忙了。",m:"perf",d:[6,-4,-7,-5,-6],r:"嗯。（她一个人把那天过完了）"}]}),
+heart1:{b:"v",bt:"✨ 长线3 · 心扉敞开线 · 阶段1",s:"她今天讲得比平时慢，中间停顿了好几次。",q:"……我每次发完脾气，一个人躺着的时候，会特别恨自己。觉得自己又把人推远了一点。",
+ o:[{tag:"接住愧疚",tx:"你发完脾气之后的那段时间，其实才是你最难熬的。我知道。",m:"emp",d:[-10,8,6,10,8],r:"……你是第一个知道这件事的人。（acc+）",acc:10},
+    {tag:"顺便劝改",tx:"那下次就忍一忍嘛，对大家都好。",m:"lect",d:[12,-11,-10,-14,-11],r:"……我就不该说。",acc:-8,lock:1}]},
+heart2:{b:"v",bt:"✨ 长线3 · 心扉敞开线 · 阶段2",s:"她讲起了很久以前的事。讲到一半停下来，确认你还在听。",q:"以前有个人，答应我很多事，后来一件都没做。我问他的时候，他说“你怎么老记这些”。……所以我才这么怕被敷衍。",
+ o:[{tag:"把过去接住",tx:"所以你不是需求高。你只是被随便对待过太多次，现在在确认我是不是也一样。",m:"emp",d:[-12,9,7,11,10],r:"……（哭了很久）对。就是这样。我自己都说不清楚，你却说出来了。",acc:12},
+    {tag:"轻描淡写",tx:"都过去了，别往心里去。",m:"perf",d:[10,-9,-9,-12,-10],r:"嗯。是都过去了。",acc:-6,lock:1}]},
+heart3:{b:"v",bt:"✨ 长线3 · 心扉敞开线 · 阶段3 · 深层内核",s:"凌晨。她打了很长一段字，删了三次，最后还是发了出来。",q:"我知道我需求很高。我知道。我每天都在怕，怕有一天你会被我耗干，然后像别人一样慢慢走开。我控制不住，所以我只能一遍一遍地确认。",
+ o:[{tag:"把她的需求正当化",tx:"你的需求不是病。它值得被认真对待——我选择被你需要，这是我自己的决定，不是消耗。",m:"pref",d:[-14,10,9,12,13],r:"……（很久很久）那你答应我，如果有一天真的累了，你要告诉我，不要悄悄走。",acc:14},
+    {tag:"劝她改性格",tx:"那你也可以试着降低一点期待，这样你自己也轻松。",m:"lect",d:[14,-13,-12,-16,-14],r:"……我就知道。我就知道说出来是错的。",acc:-10,lock:1}]},
+dual1:{b:"s",bt:"✨ 长线5 · 双向治愈线 · 开启",s:"今天是她先问的。",q:"你最近是不是很累啊。……我说真的。你总在接我的情绪，那你的呢。",
+ o:[{tag:"接住她的成长",tx:"有点累。但你问我这句话，比休息三天还管用。",m:"pref",d:[-10,8,8,9,10],r:"那你以后要跟我讲。我也想做那个接住你的人。",dual:1},
+    {tag:"夸她终于懂事",tx:"你终于学会关心别人了，以前可不这样。",m:"lect",d:[8,-8,-8,-9,-8],r:"……所以以前的我在你眼里就是很糟糕是吧。",acc:-12,dual:-1},
+    {tag:"推开",tx:"我没事，你照顾好你自己就行。",m:"perf",d:[6,-5,-5,-6,-5],r:"……你又不让我进来。好吧。"}]},
+dual2:{b:"s",bt:"✨ 长线5 · 双向治愈线 · 推进",s:"你们起了一点小矛盾。这一次，她没有直接炸。",q:"……我现在很想发脾气。但我先不发。我们能不能好好说。我在试。",
+ o:[{tag:"肯定她在试，但不要求完美",tx:"能。而且你不用一下子做到，偶尔没忍住也没关系，我不会因为这个走。",m:"pref",d:[-12,10,9,10,11],r:"……（笑了一下，眼睛是湿的）那我慢慢来。你别嫌我慢。",dual:1,acc:10},
+    {tag:"顺势要求",tx:"对，就该这样，以后都这样就好了。",m:"lect",d:[9,-8,-8,-9,-8],r:"……原来你一直在等我变成这样。",acc:-10,dual:-1}]},
+ex1:{b:"c",bt:"⚠️ 极限抉择 · 二选一",s:"同一个晚上。一边是你答应过的饭局，另一边——她刚刚发来一条语音，哭到说不成句。",q:"（语音里只有抽气的声音，三十七秒）",
+ o:[{tag:"立刻去找她",tx:"（推掉饭局，直接打回去）我现在过来，你别挂。",m:"pref",d:[-13,11,9,12,15],r:"……（哭到打嗝）你真的来了。你真的来了。"},
+    {tag:"两边兼顾",tx:"（先去饭局，中途一直给她发消息）",m:"neu",d:[7,-6,-7,-6,-8],r:"我知道你发消息了。但我要的不是消息。"},
+    {tag:"先赴约",tx:"（回她：我这边走不开，你先缓一缓）",m:"perf",d:[16,-15,-14,-14,-16],r:"好。我缓一缓。我一直都是那个要缓一缓的人。"}]},
+ex2:{b:"c",bt:"⚠️ 极限抉择 · 流言",s:"你听见有人在背后议论她，内容很难听。她还不知道。",q:"（你要怎么处理这件事）",
+ o:[{tag:"当场站她，之后告诉她",tx:"（当场顶回去，事后原原本本告诉她：我替你说了，你有权知道）",m:"pref",d:[-10,9,6,14,13],r:"……你没有瞒我。而且你站在我前面。谢谢你把我当成大人。"},
+    {tag:"替她挡下，不说",tx:"（挡回去，但决定不告诉她，免得她难受）",m:"emp",d:[-2,3,2,2,3],r:"（她后来辗转听说了）你为什么不告诉我。……我不是玻璃做的。"},
+    {tag:"不掺和",tx:"（没说话，也没告诉她）",m:"perf",d:[12,-10,-10,-14,-12],r:"你当时在场。你一个字都没说。"}]},
+ex3:{b:"c",bt:"⚠️ 极限抉择 · 耐心极限",s:"她已经连续很多天情绪不稳。今天她问了一个她问过很多次、但这次很认真的问题。",q:"你说实话。我这样反反复复，你是不是早就烦了。你不用安慰我，我想听真话。",
+ o:[{tag:"诚实但不撤回",tx:"累过。但累和不想要你，是两件事。我累的时候会跟你讲，不会偷偷走。",m:"pref",d:[-13,12,9,14,12],r:"……（很久）你是第一个承认累、但还留下来的人。",acc:10},
+    {tag:"全盘否认",tx:"怎么会，一点都不烦。",m:"perf",d:[8,-7,-7,-9,-7],r:"骗人。你刚才停顿了。"},
+    {tag:"承认烦了",tx:"说实话，确实有点吃不消。",m:"lect",d:[15,-14,-14,-13,-15],r:"……好。那我以后不烦你了。"}]},
+ex4:{b:"c",bt:"⚠️ 极限抉择 · 秘密",s:"她告诉你一件事，说完之后盯着你看了很久。",q:"这件事我只跟你一个人讲过。你不能告诉任何人。……我能信你吗。",
+ o:[{tag:"郑重承诺并做到",tx:"能。这件事会烂在我这儿，你不用再问第二次。",m:"pref",d:[-11,9,7,15,12],r:"（后来真的没有第四个人知道）……你知道吗，我现在敢把更多东西交给你了。",acc:8},
+    {tag:"答应但无意中说漏",tx:"当然能。（后来跟另一个人提了一句）",m:"perf",d:[16,-15,-15,-20,-16],r:"……我只告诉过你一个人。",crack:1}]},
+d85:{b:"c",bt:"📌 第85天 · 终局抉择节点",s:"距离第100天还有十五天。她把你约出来，说有话要讲。",q:"我想了很久。……如果我永远都是这样，情绪多、需要你哄、离不开你——你愿意一直这样下去吗。你想清楚再回答我，这次我要一个准话。",
+ o:[{tag:"给出最终承诺",tx:"愿意。不是忍，是愿意。你不用变成另一个人我才留下。",m:"pref",d:[-14,12,12,13,15],r:"……（笑着哭）那好。那我也答应你一件事——我会学着也接住你。",final:"stay",acc:12},
+    {tag:"有条件地留下",tx:"愿意，但我希望你能慢慢学着照顾自己的情绪。",m:"emp",d:[-2,3,2,2,1],r:"……也就是说，我还是得改。嗯，我努力。",final:"cond"},
+    {tag:"说不出承诺",tx:"这个……我没办法保证一辈子的事。",m:"perf",d:[14,-13,-14,-14,-16],r:"我懂了。谢谢你至少说了真话。",final:"no"}]}
+};
+
+/* ============ 引擎 ============ */
+const KEY=["p","e","m","t","l"], NAME={p:"心理压力",e:"情绪值",m:"心情值",t:"信任值",l:"爱意"};
+const CLR={p:"#E0697A",e:"#8E9BE8",m:"#E8A05C",t:"#6FC3C0",l:"#D38CB4"};
+let S=null;
+const cl=v=>Math.max(0,Math.min(100,Math.round(v*10)/10));
+const shuf=n=>{const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const ordOf=it=>{if(!it.ord||it.ord.length!==it.d.o.length)it.ord=shuf(it.d.o.length);return it.ord};
+const $=id=>document.getElementById(id);
+
+function fresh(){return{ph:"intro",qi:0,qc:0,qlog:[],day:1,q:[],si:0,acts:[],
+ A:{p:50,e:50,m:50,t:50,l:50},
+ H:{pref:0,emp:0,perf:0,lect:0,frag:50,poss:30,acc:10,fat:0,held:0},
+ B:{},D:{},used:[],label:null,heart:0,dual:0,done:{},pre:{},final:null,end:null,ban:[],qord:null};}
+
+function save(){try{localStorage.setItem("wyh_save",JSON.stringify(S))}catch(e){}}
+function load(){try{const r=localStorage.getItem("wyh_save");return r?JSON.parse(r):null}catch(e){return null}}
+
+function apply(d,mark,ctx){
+  const A=S.A,H=S.H,B=S.B,D=S.D,out={};
+  KEY.forEach((k,i)=>{
+    let v=d[i]||0;
+    if(k==="p"){ if(v>0&&B.rely)v*=0.8; if(v<0&&D.disap)v*=0.6; }
+    else{
+      if(v>0){
+        if(D.disap)v*=0.5;
+        if(S.fatLv>=3)v*=0.6;
+        if(k==="l"&&D.tired)v=0;
+        if(B.tune&&ctx==="deep")v*=1.25;
+        if(B.echo&&ctx==="act")v*=1.12;
+      }else{
+        if(ctx==="probe"&&B.calm)v*=(1-0.18*B.calm);
+      }
+    }
+    let nv=cl(A[k]+v);
+    if(k==="t"&&D.crack)nv=Math.min(nv,80);
+    out[k]=Math.round((nv-A[k])*10)/10; A[k]=nv;
+  });
+  if(mark&&H[mark]!==undefined)H[mark]++;
+  if(mark==="perf"||mark==="lect")H.fat+=mark==="lect"?1.6:1.1;
+  if(mark==="pref"||mark==="emp")H.fat=Math.max(0,H.fat-0.7);
+  if((ctx==="blow"||ctx==="emo")&&(mark==="emp"||mark==="pref"))H.held++;
+  return out;
+}
+function ban(t,c){S.ban.push({t,c});}
+
+function derive(){
+  const H=S.H,A=S.A;
+  H.poss=cl(18+A.l*0.5-A.t*0.22);
+  S.fatLv=H.fat>=45?4:H.fat>=32?3:H.fat>=20?2:H.fat>=10?1:0;
+  if(H.held>=4&&!S.B.rely){S.B.rely=1;ban("b","🟢 获得 Buff【情绪依靠】：你接住过她太多次，她的心理压力上涨速度降低了。")}
+  if(H.pref>=14&&!S.B.echo){S.B.echo=1;ban("b","🟢 获得 Buff【偏爱共鸣】：你主动的陪伴，对她的效果更强了。")}
+  if(S.heart>=2&&!S.B.tune){S.B.tune=1;ban("b","🟢 获得 Buff【心意相通】：深度交心的加成提高。")}
+  const pr=H.pref;
+  const lv=pr>=24?3:pr>=15?2:pr>=8?1:0;
+  if(lv>(S.B.calm||0)){S.B.calm=lv;ban("b","🟢 获得 Buff【安心印记·"+["","一","二","三"][lv]+"层】：她试探你时的扣分降低。"+(lv===3?"\n她忽然说：“……只有你不一样。这句话我憋了很久。”":""))}
+  if(H.lect>=10&&!S.D.disap){S.D.disap=1;ban("d","🔴 打上 Debuff【失望印记】：你的夸奖和安抚，效果减半。")}
+  if(H.poss>=68&&A.t<58&&!S.D.doubt){S.D.doubt=1;ban("d","🔴 打上 Debuff【猜忌阴霾】：爱意越高，她越容易吃醋。")}
+  if(S.fatLv>=3&&!S.D.tired){S.D.tired=1;ban("d","🔴 打上 Debuff【疲惫滤镜】：她很难再对你心动，爱意不再上涨。")}
+}
+
+function pickEvents(n){
+  const A=S.A,H=S.H;
+  let w={share:3,probe:3,blow:2,emo:2,daily:3,mine:1};
+  if(A.p>65){w.blow+=2;w.emo+=3;w.share-=1;w.daily-=1}
+  if(A.p<35&&A.m>60){w.share+=2;w.daily+=1;w.blow-=1}
+  if(H.poss>58||S.D.doubt){w.probe+=3;w.mine+=1}
+  if(A.e<40){w.emo+=2;w.blow+=1}
+  if(S.fatLv>=2){w.probe-=3;w.blow-=2;w.share-=2;w.daily+=4;w.emo-=1}
+  if(S.day===35){w.blow+=4;w.mine+=3;w.probe+=2;w.daily-=2}
+  if(S.day>=50&&S.A.t>=70){w.emo+=1;w.share+=1}
+  Object.keys(w).forEach(k=>w[k]=Math.max(0,w[k]));
+  const out=[];
+  for(let i=0;i<n;i++){
+    const tot=Object.values(w).reduce((a,b)=>a+b,0)||1;
+    let r=Math.random()*tot,ty="daily";
+    for(const k in w){r-=w[k];if(r<=0){ty=k;break}}
+    let pool=EV.map((e,ix)=>({e,ix})).filter(o=>o.e.t===ty&&!S.used.includes(o.ix)&&!out.includes(o.ix));
+    if(!pool.length){S.used=S.used.filter(ix=>EV[ix].t!==ty);pool=EV.map((e,ix)=>({e,ix})).filter(o=>o.e.t===ty&&!out.includes(o.ix))}
+    if(!pool.length)continue;
+    const p=pool[Math.floor(Math.random()*pool.length)];
+    out.push(p.ix);S.used.push(p.ix);w[ty]=Math.max(0,w[ty]-1.5);
+  }
+  return out.map(ix=>({k:"ev",d:EV[ix]}));
+}
+
+function buildDay(){
+  const sp=[],A=S.A,H=S.H,d=S.day;
+  if([13,33,63,93].includes(d))sp.push({k:"st",d:ST.anni(d)});
+  if(d>=40&&A.t>=70&&S.heart===0)sp.push({k:"st",d:ST.heart1,tag:"heart1"});
+  else if(d>=52&&A.t>=75&&S.heart===1)sp.push({k:"st",d:ST.heart2,tag:"heart2"});
+  else if(d>=66&&A.t>=85&&H.acc>=45&&S.heart===2)sp.push({k:"st",d:ST.heart3,tag:"heart3"});
+  if(d>=22&&A.l>=55&&!S.done.ex1){S.done.ex1=1;sp.push({k:"st",d:ST.ex1})}
+  else if(d>=38&&!S.done.ex2){S.done.ex2=1;sp.push({k:"st",d:ST.ex2})}
+  else if(d>=45&&A.p>=58&&!S.done.ex3){S.done.ex3=1;sp.push({k:"st",d:ST.ex3})}
+  else if(d>=55&&A.t>=70&&!S.done.ex4){S.done.ex4=1;sp.push({k:"st",d:ST.ex4})}
+  const healthy=A.e>=75&&A.m>=75&&A.t>=75&&A.l>=75&&A.p<=25;
+  if(d>=70&&S.heart>=3&&H.acc>=60&&healthy&&S.dual===0)sp.push({k:"st",d:ST.dual1});
+  else if(d>=80&&S.dual===1)sp.push({k:"st",d:ST.dual2});
+  if(d===85)sp.push({k:"st",d:ST.d85});
+  S.q=sp.concat(pickEvents(6));S.q.forEach(it=>it.ord=shuf(it.d.o.length));S.si=0;S.acts=[];S.pre={...A,lv:S.fatLv};
+}
+
+/* ---------- 满屏爱心特效 ---------- */
+const GSET=[["❤️","💗","💖"],["♥","❥","❣"],["💘","💝","💞"],["🩷","💕","💓"],["❤","♡","💗"],["💖","✨","💝"],["♥","💕","❤️","✨"]];
+const PSET=[["#FF6B9D","#FFC2D8","#FF3D7F"],["#D38CB4","#F2B6D2","#A95C8A"],["#FF8A5B","#FFC978","#FF5E78"],["#E0697A","#FFD1DC","#C2426B"],["#C77FA3","#FFE3F1","#8E5C7E"],["#F3A8CC","#FFFFFF","#FF79B0"],["#FF4D6D","#FFB3C6","#FFE0E9"]];
+const MODES=["rise","burst","rain","spiral","corners","wave"];
+const R=(a,b)=>a+Math.random()*(b-a), RI=(a,b)=>Math.floor(R(a,b+1)), PICK=a=>a[RI(0,a.length-1)];
+let fxSeq=0;
+function heartBurst(mag){
+  const fx=$("fx");if(!fx)return;
+  const box=$("lovebox");if(box){box.classList.remove("pump");void box.offsetWidth;box.classList.add("pump")}
+  if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const W=innerWidth,H=innerHeight;
+  const gl=PICK(GSET),pal=PICK(PSET),mode=MODES[(fxSeq++ + RI(0,2))%MODES.length];
+  const n=Math.min(110,Math.round(20+mag*5.5+R(0,16)));
+  const useEmoji=Math.random()<0.6;
+  for(let i=0;i<n;i++){
+    const el=document.createElement("span");
+    el.textContent=PICK(gl);
+    const sz=R(13,46)*(Math.random()<0.12?1.7:1);
+    el.style.fontSize=sz+"px";
+    if(!useEmoji||/[♥❥❣♡✿]/.test(el.textContent)){el.style.color=PICK(pal);el.style.textShadow="0 0 "+R(6,20)+"px "+PICK(pal)}
+    el.style.opacity=R(.55,1);
+    let kf,x,y,dur=R(1500,3400),delay=R(0,620);
+    if(mode==="rise"){x=R(-20,W);y=H+40;const dx=R(-130,130);
+      kf=[{transform:`translate(${x}px,${y}px) rotate(0deg) scale(.4)`,opacity:0},{offset:.12,opacity:1},{offset:.6,transform:`translate(${x+dx*0.6}px,${y-H*0.62}px) rotate(${R(-70,70)*0.6}deg) scale(1)`},{transform:`translate(${x+dx}px,${y-H-120}px) rotate(${R(-120,120)}deg) scale(.7)`,opacity:0}];}
+    else if(mode==="burst"){const cx=W/2,cy=H/2,a=R(0,6.283),d=R(120,Math.max(W,H)*0.78);
+      x=cx;y=cy;dur=R(900,1900);
+      kf=[{transform:`translate(${cx}px,${cy}px) scale(.2) rotate(0deg)`,opacity:0},{offset:.15,opacity:1,transform:`translate(${cx+Math.cos(a)*d*.25}px,${cy+Math.sin(a)*d*.25}px) scale(1.1) rotate(${R(-40,40)}deg)`},{transform:`translate(${cx+Math.cos(a)*d}px,${cy+Math.sin(a)*d+R(0,160)}px) scale(.5) rotate(${R(-200,200)}deg)`,opacity:0}];}
+    else if(mode==="rain"){x=R(0,W);y=-60;const dx=R(-60,60);
+      kf=[{transform:`translate(${x}px,${y}px) rotate(${R(-30,30)}deg) scale(.6)`,opacity:0},{offset:.1,opacity:1},{transform:`translate(${x+dx}px,${H+80}px) rotate(${R(-180,180)}deg) scale(1)`,opacity:0}];}
+    else if(mode==="spiral"){const cx=W/2,cy=H*0.56,a0=R(0,6.283),rr=R(90,Math.min(W,H)*0.55),turns=R(1.2,2.4);
+      dur=R(1800,3200);
+      const mid=[cx+Math.cos(a0+turns*3.14)*rr*0.5,cy+Math.sin(a0+turns*3.14)*rr*0.5-H*0.1];
+      kf=[{transform:`translate(${cx}px,${cy}px) scale(.3)`,opacity:0},{offset:.2,opacity:1},{offset:.6,transform:`translate(${mid[0]}px,${mid[1]}px) scale(1.05) rotate(${R(-90,90)}deg)`},{transform:`translate(${cx+Math.cos(a0+turns*6.28)*rr}px,${cy+Math.sin(a0+turns*6.28)*rr-H*0.35}px) scale(.6) rotate(${R(-220,220)}deg)`,opacity:0}];}
+    else if(mode==="corners"){const left=Math.random()<.5;const sx=left?-30:W+30,sy=H+30;const ex=left?R(W*0.3,W):R(0,W*0.7);
+      kf=[{transform:`translate(${sx}px,${sy}px) scale(.3)`,opacity:0},{offset:.14,opacity:1},{offset:.55,transform:`translate(${(sx+ex)/2}px,${R(H*0.1,H*0.4)}px) scale(1.1) rotate(${R(-60,60)}deg)`},{transform:`translate(${ex}px,${-80}px) scale(.6) rotate(${R(-160,160)}deg)`,opacity:0}];}
+    else{x=R(0,W);y=H*R(.45,.95);const amp=R(40,150);
+      kf=[{transform:`translate(${x}px,${y}px) scale(.3)`,opacity:0},{offset:.2,opacity:1,transform:`translate(${x+amp}px,${y-H*0.2}px) scale(1)`},{offset:.6,transform:`translate(${x-amp*0.7}px,${y-H*0.5}px) scale(1.05) rotate(${R(-50,50)}deg)`},{transform:`translate(${x+amp*0.4}px,${-70}px) scale(.55) rotate(${R(-140,140)}deg)`,opacity:0}];}
+    fx.appendChild(el);
+    const an=el.animate(kf,{duration:dur,delay,easing:PICK(["cubic-bezier(.2,.7,.3,1)","ease-out","cubic-bezier(.4,0,.2,1)","linear"]),fill:"forwards"});
+    an.onfinish=()=>el.remove();
+    setTimeout(()=>el.remove(),dur+delay+400);
+  }
+}
+const CSET=[["💧","😢","💔"],["😭","💧","🥺"],["💧","💧","🌧"],["💔","🥀","💧"],["😞","💧","💧"],["🩶","💧","😔"]];
+const CPAL=[["#7FA6D9","#BBD2EE","#4F6E9E"],["#8E9BE8","#C7CDF5","#5A63A8"],["#9AA5B8","#D3DAE6","#6B7385"],["#6FC3C0","#C4EAE8","#3F7F7D"],["#A08FB8","#D8CCE8","#6B5A82"]];
+const CMODES=["fall","drip","streak","welldown","sink"];
+const SADFACE=["😢","🥺","😔","😞","😣","🙁"];
+let cxSeq=0;
+function cryBurst(mag){
+  const fx=$("fx");if(!fx)return;
+  const box=$("lovebox");if(box){box.classList.remove("crack");void box.offsetWidth;box.classList.add("crack")}
+  if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const W=innerWidth,H=innerHeight;
+  const gl=PICK(CSET),pal=PICK(CPAL),mode=CMODES[(cxSeq++ + RI(0,2))%CMODES.length];
+  const n=Math.min(95,Math.round(16+mag*4.5+R(0,14)));
+  const vg=document.createElement("div");vg.className="vig";fx.appendChild(vg);
+  const va=vg.animate([{opacity:0},{opacity:1,offset:.25},{opacity:0}],{duration:R(1100,1800),easing:"ease-in-out",fill:"forwards"});
+  va.onfinish=()=>vg.remove();setTimeout(()=>vg.remove(),2400);
+  for(let i=0;i<n;i++){
+    const el=document.createElement("span");
+    el.textContent=PICK(gl);
+    const sz=R(12,38)*(Math.random()<0.1?1.6:1);
+    el.style.fontSize=sz+"px";
+    if(/[🩶]/.test(el.textContent)||Math.random()<0.35){el.style.color=PICK(pal);el.style.textShadow="0 0 "+R(5,16)+"px "+PICK(pal)}
+    el.style.filter="saturate(.85)";
+    let kf,x,y,dur=R(1400,2900),delay=R(0,700);
+    if(mode==="fall"){x=R(0,W);y=-50;const dx=R(-40,40);
+      kf=[{transform:`translate(${x}px,${y}px) scale(.5) rotate(0deg)`,opacity:0},{offset:.12,opacity:1},
+          {offset:.55,transform:`translate(${x+dx*.5}px,${H*.5}px) scale(1) rotate(${R(-20,20)}deg)`},
+          {transform:`translate(${x+dx}px,${H+70}px) scale(.8) rotate(${R(-40,40)}deg)`,opacity:0}];}
+    else if(mode==="drip"){x=R(W*.2,W*.8);y=-40;dur=R(900,1700);
+      kf=[{transform:`translate(${x}px,${y}px) scaleY(.6) scaleX(1.1)`,opacity:0},{offset:.1,opacity:1},
+          {offset:.8,transform:`translate(${x+R(-14,14)}px,${H*.86}px) scaleY(1.5) scaleX(.75)`,opacity:1},
+          {transform:`translate(${x+R(-26,26)}px,${H*.95}px) scaleY(.4) scaleX(1.6)`,opacity:0}];}
+    else if(mode==="streak"){const dir=Math.random()<.5?1:-1;x=dir>0?R(-120,W*.6):R(W*.4,W+120);y=-60;
+      dur=R(800,1500);
+      kf=[{transform:`translate(${x}px,${y}px) rotate(${dir*16}deg) scale(.6)`,opacity:0},{offset:.1,opacity:.95},
+          {transform:`translate(${x+dir*R(160,420)}px,${H+80}px) rotate(${dir*16}deg) scale(1)`,opacity:0}];}
+    else if(mode==="welldown"){const cx=W/2,cy=H*.3,a=R(.25,2.89);
+      const d=R(120,Math.max(W,H)*.7);dur=R(1200,2200);
+      kf=[{transform:`translate(${cx}px,${cy}px) scale(.2)`,opacity:0},{offset:.18,opacity:1,transform:`translate(${cx+Math.cos(a)*d*.3}px,${cy+Math.sin(a)*d*.3}px) scale(1)`},
+          {transform:`translate(${cx+Math.cos(a)*d}px,${cy+Math.sin(a)*d+H*.35}px) scale(.6) rotate(${R(-60,60)}deg)`,opacity:0}];}
+    else{x=R(0,W);y=H*R(.2,.6);dur=R(1800,3200);
+      kf=[{transform:`translate(${x}px,${y}px) scale(.4)`,opacity:0},{offset:.2,opacity:.9},
+          {offset:.65,transform:`translate(${x+R(-30,30)}px,${y+H*.25}px) scale(1)`},
+          {transform:`translate(${x+R(-50,50)}px,${H+60}px) scale(.7)`,opacity:0}];}
+    fx.appendChild(el);
+    const an=el.animate(kf,{duration:dur,delay,easing:PICK(["cubic-bezier(.4,0,.6,1)","ease-in","linear","cubic-bezier(.55,0,.9,.6)"]),fill:"forwards"});
+    an.onfinish=()=>el.remove();
+    setTimeout(()=>el.remove(),dur+delay+400);
+  }
+}
+function harmOf(g){let h=0;["e","m","t","l"].forEach(k=>{if(g[k]<0)h-=g[k]});if(g.p>0)h+=g.p;return h}
+/* ---------- 渲染 ---------- */
+function hud(){
+  const h=$("hud");h.hidden=false;const A=S.A;
+  const bars=KEY.map(k=>{
+    const v=A[k],goal=k==="p"?v<=20:v>=80,dang=k==="p"?v>=80:v<=20;
+    return `<div class="bar ${k==="p"?"goal20":"goal80"} ${goal?"ok":""} ${dang?"danger":""}">
+      <span class="n">${NAME[k]}</span>
+      <span class="t"><span class="f" style="width:${v}%;background:${CLR[k]}"></span></span>
+      <span class="v">${Math.round(v)}</span></div>`}).join("");
+  const chips=[];
+  if(S.B.calm)chips.push(["b","安心印记·"+["","一","二","三"][S.B.calm]+"层"]);
+  if(S.B.rely)chips.push(["b","情绪依靠"]);if(S.B.tune)chips.push(["b","心意相通"]);if(S.B.echo)chips.push(["b","偏爱共鸣"]);
+  if(S.D.crack)chips.push(["d","裂痕标记"]);if(S.D.disap)chips.push(["d","失望印记"]);
+  if(S.D.doubt)chips.push(["d","猜忌阴霾"]);if(S.D.tired)chips.push(["d","疲惫滤镜"]);
+  if(S.label)chips.push(["","印象：" + S.label]);
+  if(S.fatLv>=1)chips.push(["d","疏远 Lv"+S.fatLv]);
+  h.innerHTML=`<div class="hudtop"><span class="day">DAY <b>${S.day}</b> / 100</span>
+    <span class="day" style="color:var(--tx3)">今日事件 ${Math.min(S.si+1,S.q.length)}/${S.q.length}</span>
+    <span class="lovebox" id="lovebox" title="爱意值 ${Math.round(A.l)}">
+      <svg viewBox="0 0 32 30" width="25" height="23"><defs>
+        <linearGradient id="lg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#A9548A"/><stop offset="1" stop-color="#F3A8CC"/></linearGradient>
+        <clipPath id="hc"><rect x="0" y="${(29*(100-A.l)/100).toFixed(2)}" width="32" height="30"/></clipPath></defs>
+        <path d="M16 28.6C16 28.6 2 19.7 2 10.3 2 5.7 5.6 2.1 10.2 2.1 13 2.1 15.2 3.6 16 5.3 16.8 3.6 19 2.1 21.8 2.1 26.4 2.1 30 5.7 30 10.3 30 19.7 16 28.6 16 28.6Z" fill="#372E4F"/>
+        <path d="M16 28.6C16 28.6 2 19.7 2 10.3 2 5.7 5.6 2.1 10.2 2.1 13 2.1 15.2 3.6 16 5.3 16.8 3.6 19 2.1 21.8 2.1 26.4 2.1 30 5.7 30 10.3 30 19.7 16 28.6 16 28.6Z" fill="url(#lg)" clip-path="url(#hc)"/>
+      </svg><span class="lb">爱意</span><b>${Math.round(A.l)}</b></span>
+    <span class="who">温雅欢 · 双鱼</span></div>
+    <div class="bars">${bars}</div>
+    ${chips.length?`<div class="chips">${chips.map(c=>`<span class="chip ${c[0]}">${c[1]}</span>`).join("")}</div>`:""}`;
+}
+function say(q,cls,av){return q?`<div class="say"><span class="ava ${av?"sad":""}">${av||"雅"}</span><div class="bub ${cls||""}">${q}</div></div>`:""}
+function bans(){const b=S.ban.map(x=>`<div class="banner ${x.t==="b"?"s":x.t==="d"?"c":"v"}">${x.c.replace(/\n/g,"<br>")}</div>`).join("");S.ban=[];return b}
+function render(h){$("app").innerHTML=h;$("app").firstElementChild&&$("app").firstElementChild.classList.add("fade");save()}
+function on(id,fn){const e=$(id);if(e)e.onclick=fn}
+
+/* ---------- 开场 ---------- */
+function intro(){
+  $("hud").hidden=true;
+  render(`<div><h1><small>朋友养成系 · 100 DAYS</small>读懂温雅欢</h1>
+  <p class="lede">她叫温雅欢。高需求型人格——朋友都说她麻烦：情绪多，敏感，一点小事就能难受很久，吵完又会一个人后悔到天亮。她的情绪不是“作”，底下压着的东西，你得自己去读。</p>
+  <p class="lede" style="margin-top:14px">你有 100 天。每天 6 个突发事件，你的每一次回应都会落在她身上。第 100 天结算时，五项属性全部达标，才算真的接住了她。</p>
+  <p class="lede" style="margin-top:14px;color:var(--tx3)">——关于她的生日、星座，和她真正在意的那些东西，这里一个字都不会先告诉你。</p>
+  <div class="banner s">正式开始之前，先来 8 道摸底题。它们不会提示对错，但会决定你和她的起点——你越懂她，开局她离你越近。</div>
+  <details><summary>规则与达标线（展开）</summary><ul>
+  <li><b>情绪值 / 心情值 / 信任值 / 爱意</b>：第100天需 ≥80。任意一项跌到 ≤10，立刻友情破裂。</li>
+  <li><b>心理压力</b>：唯一反向属性，越低越好。第100天需 ≤20；一旦冲到 ≥90，同样触发破裂结局。</li>
+  <li>后台还有四项隐藏数值（记忆印记、脆弱阈值、占有倾向、自我接纳）在悄悄运转，只在触发时提示你。</li>
+  <li>每天 6 个事件结束后，可以主动发起已解锁的互动（每天最多 2 次）。</li>
+  </ul></details>
+  <button class="btn" id="go">开始摸底问答</button></div>`);
+  on("go",()=>{S.ph="quiz";quiz()});
+}
+/* ---------- 问答 ---------- */
+function quiz(){
+  const Q=QUIZ[S.qi];
+  if(!S.qord||S.qord.length!==QUIZ.length)S.qord=QUIZ.map(q=>shuf(q.o.length));
+  const od=S.qord[S.qi];
+  render(`<div style="padding-top:26px">
+    <div class="eyebrow">初识摸底问答</div>
+    <div class="card">
+      <span class="qnum">第 ${S.qi+1} 题 / 共 8 题</span>
+      <div class="qtxt">${Q.q}</div>
+      <div class="opts">${od.map((oi,i)=>`<button class="opt" data-i="${oi}"><span class="k">${"ABCD"[i]}</span><span class="tx">${Q.o[oi]}</span></button>`).join("")}</div>
+      <div class="prog">${QUIZ.map((_,i)=>`<i class="${i<=S.qi?"on":""}"></i>`).join("")}</div>
+    </div></div>`);
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i,ok=i===Q.a;S.qlog.push({i,ok});if(ok)S.qc++;
+    S.qi++;S.qi<8?quiz():quizEnd();
+  });
+}
+function quizEnd(){
+  const base=50+S.qc*3-(8-S.qc)*2, v=Math.max(30,Math.min(70,base));
+  KEY.forEach(k=>S.A[k]=v);
+  S.A.l=Math.min(45,v);
+  S.A.p=Math.max(20,Math.min(70,100-v));
+  S.H.acc=Math.round(6+S.qc*1.5);
+  S.ph="quizres";
+  const lines=QUIZ.map((q,i)=>`<li>${S.qlog[i].ok?"<span class='up'>✓</span>":"<span class='dn'>✗</span>"} ${QEXP[i]}</li>`).join("");
+  const word=S.qc>=7?"你几乎什么都知道。她第一眼看你，就觉得你和别人不一样。":
+             S.qc>=5?"你大致懂她。剩下的那部分，要靠这100天补上。":
+             S.qc>=3?"你只摸到了她的表面。开局会有点吃力。":"你几乎什么都不知道。这100天会很难。";
+  hud();
+  render(`<div style="padding-top:20px">
+    <div class="eyebrow">摸底结算</div>
+    <h1 style="margin-top:6px;font-size:24px">答对 ${S.qc} / 8</h1>
+    <p class="lede">${word}</p>
+    <div class="card"><div class="eyebrow">正确答案</div><ul style="color:var(--tx2);font-size:13px;line-height:2;padding-left:18px;margin:10px 0 0">${lines}</ul></div>
+    <div class="card"><div class="eyebrow">你的专属初始面板</div>
+      <div class="deltas">${KEY.map(k=>`<div class="dl"><div class="n">${NAME[k]}</div><div class="v">${Math.round(S.A[k])}</div></div>`).join("")}</div>
+      <p style="color:var(--tx3);font-size:12px;margin:12px 0 0">心理压力为反向属性，由你的熟悉度反向生成：越懂她，她在你面前越松弛。<br>爱意是唯一不能靠答题拿高的属性——开局上限 45。认识得再准，偏爱也只能靠这100天一天一天攒。</p></div>
+    ${say("……你好。<br>我这个人吧，朋友都说我麻烦。情绪多，爱计较，一点小事就能难受半天。<br>你要是嫌烦，现在走还来得及。<br>……但你要是留下来了，就别中途不要我。")}
+    <button class="btn" id="go">进入第 1 天</button></div>`);
+  on("go",()=>{S.ph="day";S.day=1;derive();buildDay();step()});
+}
+/* ---------- 每日事件 ---------- */
+function step(){
+  hud();
+  if(S.si>=S.q.length){settle();return}
+  const it=S.q[S.si],d=it.d,od=ordOf(it);
+  const banner=d.bt?`<div class="banner ${d.b==="c"?"c":d.b==="s"?"s":"v"}">${d.bt}</div>`:"";
+  render(`<div style="padding-top:18px">${bans()}${banner}
+    <div class="card">
+      <div class="eyebrow">第 ${S.day} 天 · 事件 ${S.si+1}/${S.q.length}</div>
+      <p class="scene">${d.s}</p>
+      ${say(d.q)}
+      <div class="opts">${od.map((oi,i)=>`<button class="opt" data-i="${oi}"><span class="k">${"ABCD"[i]}</span><span class="tx">${d.o[oi].tx}</span><span class="tag">倾向：${d.o[oi].tag||"—"}</span></button>`).join("")}</div>
+    </div></div>`);
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(+b.dataset.i));
+}
+function pick(i){
+  const it=S.q[S.si],d=it.d,o=d.o[i],pos=ordOf(it).indexOf(i);
+  const gain=apply(o.d,o.m,d.t||"st");
+  if(o.acc)S.H.acc=cl(S.H.acc+o.acc);
+  if(o.crack&&!S.D.crack){S.D.crack=1;ban("d","🔴 打上 Debuff【裂痕标记】：信任值上限被锁死在 80，真结局已不可达。")}
+  if(d===ST.heart1||d===ST.heart2||d===ST.heart3){
+    if(o.lock){S.heart=-1;ban("d","🔴 心扉敞开线已锁死：她不会再和你聊深层心事。")}
+    else{S.heart++;ban("b","✨ 心扉敞开线推进至阶段 "+S.heart+"。")}
+  }
+  if(o.dual){S.dual=o.dual>0?S.dual+1:-1;ban(o.dual>0?"b":"d",o.dual>0?"✨ 双向治愈线推进。":"🔴 双向治愈线断裂：她又缩回了那个只会索取的位置。")}
+  if(o.final)S.final=o.final;
+  if((d.t==="blow"||d.t==="emo")&&(o.m==="lect")&&!S.D.crack&&Math.random()<0.5){
+    S.D.crack=1;ban("d","🔴 打上 Debuff【裂痕标记】：你在她最脆弱的时候讲了道理。信任上限锁死在 80。");
+  }
+  derive();
+  const dead=deathCheck(),harm=harmOf(gain);
+  render(`<div style="padding-top:18px"><div class="card">
+    <div class="eyebrow">第 ${S.day} 天 · 事件 ${S.si+1}/${S.q.length}</div>
+    <p class="scene">${d.s}</p>${say(d.q)}
+    <div class="opts"><button class="opt picked" disabled><span class="k">${"ABCD"[pos<0?0:pos]}</span><span class="tx">${o.tx}</span><span class="tag">倾向：${o.tag||"—"}</span></button></div>
+    <div class="react">${say(o.r,"",harm>=2?PICK(SADFACE):"")}</div>
+    </div>${bans()}
+    <button class="btn" id="nx">${dead?"……":"继续"}</button></div>`);
+  hud();
+  if(gain.l>0)heartBurst(gain.l);else if(harm>=2)cryBurst(harm);
+  if(dead){on("nx",()=>ending("break"));return}
+  on("nx",()=>{S.si++;step()});
+}
+function deathCheck(){const A=S.A;return A.e<=10||A.m<=10||A.t<=10||A.l<=10||A.p>=90}
+
+/* ---------- 日终结算 ---------- */
+function nodeMsg(){
+  const d=S.day,H=S.H,A=S.A,out=[];
+  if(d===20){
+    const m=[["pref","偏爱型"],["emp","共情型"],["lect","讲道理型"],["perf","敷衍型"]].sort((a,b)=>H[b[0]]-H[a[0]])[0];
+    S.label=m[1];
+    out.push(["v","📌 第20天 · 初识磨合节点｜她对你的初步印象已经定型：<b>"+m[1]+"</b>。"+
+      ({"偏爱型":"她开始相信自己在你这里是特别的，后面的试探会变温柔。",
+        "共情型":"她觉得你懂她。崩溃时她更愿意把真实的一面给你。",
+        "讲道理型":"她在你面前会下意识地绷着，怕说错话又被分析一遍。",
+        "敷衍型":"她已经开始怀疑自己在你这儿到底算什么了。"})[m[1]]]);
+  }
+  if(d===35)out.push(["c","📌 第35天 · 冲突高发节点｜这几天她格外敏感，什么都能点燃。前面攒下的底子，现在要还账了。"]);
+  if(d===50){
+    const good=A.t>=68&&A.l>=68&&A.p<=45;
+    out.push([good?"v":"c","📌 第50天 · 中期分水岭｜"+(good?"她开始愿意在你面前露出更软的那一面。心扉敞开线中段已经打开。":"她在慢慢收回自己。倦怠疏远线加速推进，冷淡事件会变多。")]);
+    if(!good)S.H.fat+=5;
+  }
+  if(d===70){
+    const ok=S.heart>=3&&H.acc>=60&&A.e>=75&&A.m>=75&&A.t>=75&&A.l>=75&&A.p<=25;
+    out.push([ok?"v":"c","📌 第70天 · 双向线开启节点｜"+(ok?"条件达成。她开始学着也看见你。":"条件未达成，双向治愈线已锁死——她仍然只会单向地向你索取。")]);
+    if(!ok)S.dual=-9;
+  }
+  if(d===85&&!S.final)out.push(["c","📌 第85天 · 终局抉择已发生。"]);
+  const lv=S.fatLv;
+  if(lv&&lv!==S.pre.lv){
+    const t=["","🔸 倦怠疏远 Lv1 · 热情减退：她不再频繁找你分享和撒娇了。",
+      "🔸 倦怠疏远 Lv2 · 礼貌疏离：她说话开始客气，不再发脾气，也不再跟你要夸奖。",
+      "🔸 倦怠疏远 Lv3 · 期待归零：她不再在你面前脆弱。你的夸奖和陪伴，对她的效果大幅衰减。",
+      "🔸 倦怠疏远 Lv4 · 她已经准备好体面地走开了。"][lv];
+    out.push(["c",t]);
+  }
+  return out;
+}
+function settle(){
+  const A=S.A,p=S.pre;
+  if(A.p>70)S.H.frag=cl(S.H.frag-2.5);
+  if(S.H.held>=(S.preHeld||0)+2)S.H.frag=cl(S.H.frag+2);
+  S.preHeld=S.H.held;
+  derive();
+  const msgs=nodeMsg();
+  const rows=KEY.map(k=>{const c=Math.round((A[k]-p[k])*10)/10;
+    const good=k==="p"?c<0:c>0;
+    return `<div class="dl"><div class="n">${NAME[k]}</div><div class="v">${Math.round(A[k])}<span class="c ${c===0?"fl":good?"up":"dn"}">${c>0?"▲"+c:c<0?"▼"+Math.abs(c):"—"}</span></div></div>`}).join("");
+  const unl=ACTS.map(a=>({a,ok:a.c(S),used:S.acts.includes(a.id)}));
+  const list=unl.map(u=>`<button class="ia" data-id="${u.a.id}" ${u.ok&&!u.used&&S.acts.length<2?"":"disabled"}>
+      <span><span class="nm">${u.a.n}</span><br><span class="cd">${u.a.cd}</span></span>
+      <span class="st">${u.used?"今日已用":u.ok?(S.acts.length>=2?"今日已满":"可发起"):"未解锁"}</span></button>`).join("");
+  hud();
+  const last=S.day>=100;
+  render(`<div style="padding-top:18px">
+    <div class="eyebrow">第 ${S.day} 天 · 结算</div>
+    ${bans()}
+    ${msgs.map(m=>`<div class="banner ${m[0]}">${m[1]}</div>`).join("")}
+    <div class="card"><div class="eyebrow">今日属性变动</div><div class="deltas">${rows}</div></div>
+    <div class="card"><div class="eyebrow">可主动发起的互动 · 今日已用 ${S.acts.length}/2</div><div class="ilist">${list}</div></div>
+    <div class="row"><button class="btn" id="nx">${last?"进入终章结算":"进入第 "+(S.day+1)+" 天"}</button>
+    ${S.day<100?`<button class="btn q" id="sk">快进 7 天（自动保守应对）</button>`:""}</div></div>`);
+  document.querySelectorAll(".ia").forEach(b=>b.onclick=()=>actRun(b.dataset.id));
+  on("nx",()=>{ if(last){finale();return} nextDay(); });
+  on("sk",skip);
+}
+function nextDay(){
+  const A=S.A;
+  A.p=cl(A.p+(S.B.rely?1.1:1.6));
+  if(A.p>70){A.e=cl(A.e-1.6);A.m=cl(A.m-1.6)}
+  if(A.p<30){A.e=cl(A.e+0.8);A.m=cl(A.m+0.8)}
+  if(S.fatLv>=2){A.l=cl(A.l-0.8);A.m=cl(A.m-0.6)}
+  derive();
+  if(S.fatLv>=4&&S.day>=45){ending("drift");return}
+  if(deathCheck()){ending("break");return}
+  S.day++;S.pre={...A,lv:S.fatLv};buildDay();step();
+}
+function skip(){
+  for(let i=0;i<7&&S.day<100;i++){
+    buildDay();
+    S.q.forEach(it=>{
+      const safe=it.d.o.find(x=>x.m==="emp")||it.d.o.find(x=>x.m==="pref")||it.d.o[0];
+      apply(safe.d,safe.m,it.d.t||"st");
+      if(safe.acc)S.H.acc=cl(S.H.acc+safe.acc);
+    });
+    derive();
+    if(deathCheck()){ending("break");return}
+    nextDayQuiet();
+    if(S.end)return;
+  }
+  S.pre={...S.A,lv:S.fatLv};buildDay();step();
+}
+function nextDayQuiet(){
+  const A=S.A;A.p=cl(A.p+(S.B.rely?1.1:1.6));
+  if(A.p>70){A.e=cl(A.e-1.6);A.m=cl(A.m-1.6)}
+  derive();
+  if(S.fatLv>=4&&S.day>=45){ending("drift");return}
+  S.day++;
+}
+/* ---------- 主动互动 ---------- */
+function actRun(id){
+  const a=ACTS.find(x=>x.id===id);
+  if(a.qa)return actQA(a,null);
+  hud();const od=shuf(a.o.length);
+  render(`<div style="padding-top:18px"><div class="banner s">💠 主动互动 · ${a.n}</div>
+   <div class="card"><p class="scene">${a.i}</p>${say(a.q)}
+   <div class="opts">${od.map((oi,i)=>`<button class="opt" data-i="${oi}"><span class="k">${"ABCD"[i]}</span><span class="tx">${a.o[oi].tx}</span></button>`).join("")}</div>
+   </div></div>`);
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const o=a.o[+b.dataset.i];
+    const gain=apply(o.d,o.m,id==="tanxin"?"deep":"act");
+    if(o.acc)S.H.acc=cl(S.H.acc+o.acc);
+    S.acts.push(id);derive();
+    const dead=deathCheck(),harm=harmOf(gain);
+    render(`<div style="padding-top:18px"><div class="banner s">💠 主动互动 · ${a.n}</div>
+      <div class="card"><p class="scene">${a.i}</p>${say(a.q)}
+      <div class="opts"><button class="opt picked" disabled><span class="tx">${o.tx}</span></button></div>
+      <div class="react">${say(o.r,"",harm>=2?PICK(SADFACE):"")}</div></div>${bans()}
+      <button class="btn" id="bk">返回结算</button></div>`);
+    hud();
+    if(gain.l>0)heartBurst(gain.l);else if(harm>=2)cryBurst(harm);
+    on("bk",()=>dead?ending("break"):settle());
+  });
+}
+function actQA(a,bi){
+  hud();
+  const head=`<div class="banner s">\ud83d\udca0 主动互动 · ${a.n}</div>`;
+  if(bi===null){
+    const ao=shuf(a.qa.length);
+    render(`<div style="padding-top:18px">${head}
+      <div class="card"><p class="scene">${a.i}</p>${say(a.q)}
+      <div class="opts">${ao.map((qi,i)=>`<button class="opt" data-i="${qi}"><span class="k">${"ABCD"[i]}</span><span class="tx">${a.qa[qi].ask}</span><span class="tag">先抛问句，等她接话</span></button>`).join("")}</div>
+      </div></div>`);
+    document.querySelectorAll(".opt").forEach(x=>x.onclick=()=>actQA(a,+x.dataset.i));
+    return;
+  }
+  const b=a.qa[bi],ho=shuf(b.hit.length);
+  const ask=`<div class="opts"><button class="opt picked" disabled><span class="k">你</span><span class="tx">${b.ask}</span></button></div>`;
+  render(`<div style="padding-top:18px">${head}
+    <div class="card"><p class="scene">${a.i}</p>${say(a.q)}${ask}
+    <div class="react">${say(b.her)}</div>
+    <div class="opts" style="margin-top:16px">${ho.map((oi,i)=>`<button class="opt" data-i="${oi}"><span class="k">${"ABCD"[i]}</span><span class="tx">${b.hit[oi].tx}</span><span class="tag">接下去的答句</span></button>`).join("")}</div>
+    </div></div>`);
+  document.querySelectorAll(".opt:not(.picked)").forEach(x=>x.onclick=()=>{
+    const o=b.hit[+x.dataset.i];
+    const gain=apply(o.d,o.m,"act");
+    if(o.acc)S.H.acc=cl(S.H.acc+o.acc);
+    S.acts.push(a.id);derive();
+    const dead=deathCheck(),harm=harmOf(gain);
+    render(`<div style="padding-top:18px">${head}
+      <div class="card"><p class="scene">${a.i}</p>${say(a.q)}${ask}
+      <div class="react">${say(b.her)}</div>
+      <div class="opts" style="margin-top:16px"><button class="opt picked" disabled><span class="k">你</span><span class="tx">${o.tx}</span></button></div>
+      <div class="react">${say(o.r,"",harm>=2?PICK(SADFACE):"")}</div></div>${bans()}
+      <button class="btn" id="bk">返回结算</button></div>`);
+    hud();
+    if(gain.l>0)heartBurst(gain.l);else if(harm>=2)cryBurst(harm);
+    on("bk",()=>dead?ending("break"):settle());
+  });
+}
+/* ---------- 结局 ---------- */
+function finale(){
+  const A=S.A,H=S.H;
+  const ok=A.e>=80&&A.m>=80&&A.t>=80&&A.l>=80&&A.p<=20;
+  if(ok&&S.dual>=2&&H.acc>=60&&S.final!=="no"&&!S.D.crack)return ending("true");
+  if(ok)return ending("good");
+  if(H.acc>=80)return ending("self");
+  if(A.l>=78&&(A.t<62||A.e<62))return ending("hot");
+  if(S.fatLv>=3)return ending("drift");
+  if(A.e>=60&&A.m>=60&&A.t>=60&&A.l>=60&&A.p<=40)return ending("normal");
+  return ending("cool");
+}
+const ENDS={
+ "true":{tier:"TRUE END",t:"彼此托底的唯一知己",
+  p:["第100天，她先开的口。","她说这一年她学会了一件事：难受的时候可以先说“我现在很难受”，而不是直接摔门。她还是会吃醋，还是需要你一天夸她三次，但她不再害怕自己的需求会把你吓跑了——因为你一次都没走。"],
+  f:"“我以前总觉得，像我这样的人，迟早会被人放下。”<br>“现在我不这么想了。”<br>“不是因为我变好了，是因为你一直在。”<br>“……以后换我接住你，行不行。”"},
+ good:{tier:"GOOD END",t:"专属偏爱好友",
+  p:["五项全部达标。她把你放在了一个谁也动不了的位置上。","只是到最后，仍然是你在接她，她在被接。她依赖你、需要你、把所有情绪都交给你——这段关系稳定、长久、独一无二，但始终是单向的。"],
+  f:"“你知道你对我来说是什么吗。”<br>“是那个我半夜两点发消息，不用想要不要打扰的人。”<br>“全世界就你一个。”"},
+ normal:{tier:"NORMAL END",t:"平淡好友",
+  p:["没有破裂，但也没有那份“独一无二”。","你们还是朋友，会聊天、会约饭，只是她不再把最脆弱的部分给你了。她学会了在你面前做一个得体的人——这对她来说，并不是一件好事。"],
+  f:"“挺好的呀，我们现在这样。”<br>“……嗯，挺好的。”"},
+ cool:{tier:"NORMAL END",t:"客气的熟人",
+  p:["属性没能维持住。她没有和你吵，只是慢慢把分寸感还给了你。","她依然会回你消息，依然礼貌，只是再也没有那些凌晨两点的“睡不着”了。"],
+  f:"“最近挺好的，谢谢关心。”<br>（这句话她对谁都说。）"},
+ break:{tier:"BAD END 1",t:"激烈决裂",
+  p:["有一项属性跌穿了底线。积压到最后，所有的东西一起炸了。","她说了很多很难听的话，有些是真的，有些只是想让你疼。说完之后她删掉了所有聊天记录。"],
+  f:"“我早就知道会这样。”<br>“我每次都知道，可我每次都还是会抱一点希望。”<br>“……以后别找我了。”"},
+ drift:{tier:"BAD END 2",t:"渐行渐远",
+  p:["没有争吵，没有告别。倦怠疏远线走到了尽头。","她先是不再分享，然后不再吃醋，最后连脾气都不发了。你们之间所有尖锐的东西都被磨平了，剩下一片体面的、空的平静。"],
+  f:"“嗯，好的。”<br>“你也是。”<br>（最后一条消息停在半年前。）"},
+ hot:{tier:"SECRET END",t:"短暂热烈",
+  p:["爱意很高，信任和情绪却长期在底部。","她爱得很用力，也疑得很用力。你给的偏爱是真的，可她始终没敢相信它能持续。这段关系浓烈得像烧起来的纸——亮过，然后很快就没了。"],
+  f:"“我好像真的很喜欢你这个朋友。”<br>“但我一直在等你哪天不要我。”<br>“……我太累了。”"},
+ self:{tier:"SECRET END",t:"自我和解",
+  p:["属性没有全部达标，但她的自我接纳被你一点点拉满了。","她没有变成一个“不需要人”的人，她只是终于不再把全部重量压在某一个人身上了。她开始能自己消化一些情绪，开始相信自己值得被喜欢——哪怕那个人不总在。"],
+  f:"“我以前觉得，没人一直陪着我，我就活不下去。”<br>“现在好像……也还行。”<br>“谢谢你那段时间一直在。真的。”"}
+};
+function ending(k){
+  S.end=k;S.ph="end";const e=ENDS[k];
+  hud();
+  const H=S.H;
+  render(`<div class="end" style="padding-top:10px">
+    <div class="tier">${e.tier} · 第 ${S.day} 天</div>
+    <h2>${e.t}</h2>
+    ${e.p.map(x=>`<p>${x}</p>`).join("")}
+    <div class="fin">${e.f}</div>
+    <div class="card" style="text-align:left"><div class="eyebrow">终章数据</div>
+      <div class="deltas">${KEY.map(k2=>`<div class="dl"><div class="n">${NAME[k2]}</div><div class="v">${Math.round(S.A[k2])}</div></div>`).join("")}</div>
+      <div class="deltas" style="margin-top:8px">
+        <div class="dl"><div class="n">自我接纳（隐藏）</div><div class="v">${Math.round(H.acc)}</div></div>
+        <div class="dl"><div class="n">脆弱阈值（隐藏）</div><div class="v">${Math.round(H.frag)}</div></div>
+        <div class="dl"><div class="n">占有倾向（隐藏）</div><div class="v">${Math.round(H.poss)}</div></div>
+        <div class="dl"><div class="n">心扉阶段</div><div class="v">${S.heart<0?"锁死":S.heart}</div></div>
+      </div>
+      <p style="color:var(--tx3);font-size:12px;margin:12px 0 0">记忆印记 · 偏爱 ${H.pref} / 共情 ${H.emp} / 敷衍 ${H.perf} / 说教 ${H.lect}　｜　印象标签：${S.label||"未定型"}</p>
+    </div>
+    <button class="btn" id="again">再来一次</button></div>`);
+  on("again",reset);
+}
+function reset(){try{localStorage.removeItem("wyh_save")}catch(e){}S=fresh();intro()}
+
+/* ---------- 启动 ---------- */
+function boot(hot){
+  S=(hot&&hot.S)||load()||fresh();
+  if(!S.A||!S.H){S=fresh()}
+  S.ban=S.ban||[];derive();
+  if(S.ph==="end"&&S.end)return ending(S.end);
+  if(S.ph==="day"){ if(!S.q||!S.q.length)buildDay(); return S.si>=S.q.length?settle():step(); }
+  if(S.ph==="quiz")return quiz();
+  if(S.ph==="quizres")return quizEnd();
+  intro();
+}
+$("restart").onclick=()=>{if(confirm("重新开始？当前进度会被清空。"))reset()};
+try{if(localStorage.getItem("wyh_save"))$("savenote").textContent="· 进度自动保存在本机"}catch(e){}
+if(window.claude&&window.claude.hot){
+  window.claude.hot.snapshot(()=>({S}));
+  window.claude.hot.ready?window.claude.hot.ready(d=>boot(d)):boot(window.claude.hot.data);
+}else boot();
+</script>
+</body>
+</html>
