@@ -676,100 +676,101 @@ function buildDay(){
 }
 
 /* ---------- 满屏爱心特效 ---------- */
-const GSET=[["❤️","💗","💖"],["♥","❥","❣"],["💘","💝","💞"],["🩷","💕","💓"],["❤","♡","💗"],["💖","✨","💝"],["♥","💕","❤️","✨"]];
-const PSET=[["#FF6B9D","#FFC2D8","#FF3D7F"],["#D38CB4","#F2B6D2","#A95C8A"],["#FF8A5B","#FFC978","#FF5E78"],["#E0697A","#FFD1DC","#C2426B"],["#C77FA3","#FFE3F1","#8E5C7E"],["#F3A8CC","#FFFFFF","#FF79B0"],["#FF4D6D","#FFB3C6","#FFE0E9"]];
-const MODES=["rise","burst","rain","spiral","corners","wave"];
-const R=(a,b)=>a+Math.random()*(b-a), RI=(a,b)=>Math.floor(R(a,b+1)), PICK=a=>a[RI(0,a.length-1)];
+/* ---------- 选择反馈特效：对=爱心 / 错=哭泣 / 不对不错=微笑 ---------- */
+const R=(x,y)=>x+Math.random()*(y-x), RI=(x,y)=>Math.floor(R(x,y+1)), PICK=a=>a[RI(0,a.length-1)];
+const FX={
+ love:{
+  g:[["❤️","💗","💖"],["♥","❥","❣"],["💘","💝","💞"],["🩷","💕","💓"],["❤","♡","💗"],["💖","✨","💝"],["♥","💕","❤️","✨"]],
+  p:[["#FF6B9D","#FFC2D8","#FF3D7F"],["#D38CB4","#F2B6D2","#A95C8A"],["#FF8A5B","#FFC978","#FF5E78"],["#E0697A","#FFD1DC","#C2426B"],["#C77FA3","#FFE3F1","#8E5C7E"],["#F3A8CC","#FFFFFF","#FF79B0"],["#FF4D6D","#FFB3C6","#FFE0E9"]],
+  m:["rise","burst","spiral","corners","wave"],badge:"pump",cap:110,base:20,per:5.5},
+ cry:{
+  g:[["💧","😢","💔"],["😭","💧","🥺"],["💧","💧","🌧"],["💔","🥀","💧"],["😞","💧","💧"],["💧","😔","·"]],
+  p:[["#7FA6D9","#BBD2EE","#4F6E9E"],["#8E9BE8","#C7CDF5","#5A63A8"],["#9AA5B8","#D3DAE6","#6B7385"],["#6FC3C0","#C4EAE8","#3F7F7D"],["#A08FB8","#D8CCE8","#6B5A82"]],
+  m:["fall","drip","streak","welldown","sink"],badge:"crack",vig:1,cap:95,base:16,per:4.5},
+ smile:{
+  g:[["😊","·"],["😊","🙂","·"],["😊","☺","·"],["🙂","😊","·"],["😊","·","˙"]],
+  p:[["#D9C9A8","#EFE4CE","#B9A98A"],["#C7D6C0","#E6EFE1","#9FB398"],["#D4C4D8","#EDE2EF","#AC97B2"],["#CFD8DE","#E9EFF3","#A3B0BA"]],
+  m:["rise","wave","corners"],badge:null,cap:18,base:9,per:0},
+};
 let fxSeq=0;
-function heartBurst(mag){
-  const fx=$("fx");if(!fx)return;
-  const box=$("lovebox");if(box){box.classList.remove("pump");void box.offsetWidth;box.classList.add("pump")}
-  if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-  const W=innerWidth,H=innerHeight;
-  const gl=PICK(GSET),pal=PICK(PSET),mode=MODES[(fxSeq++ + RI(0,2))%MODES.length];
-  const dens=Math.min(1,Math.max(.4,(W*H)/(1280*800)));
-  const n=Math.max(10,Math.round(Math.min(110,20+mag*5.5+R(0,16))*dens));
-  const useEmoji=Math.random()<0.6;
-  for(let i=0;i<n;i++){
-    const el=document.createElement("span");
-    el.textContent=PICK(gl);
-    const sz=R(13,46)*(Math.random()<0.12?1.7:1);
-    el.style.fontSize=sz+"px";
-    if(!useEmoji||/[♥❥❣♡✿]/.test(el.textContent)){el.style.color=PICK(pal);el.style.textShadow="0 0 "+R(6,20)+"px "+PICK(pal)}
-    el.style.opacity=R(.55,1);
-    let kf,x,y,dur=R(1500,3400),delay=R(0,620);
-    if(mode==="rise"){x=R(-20,W);y=H+40;const dx=R(-130,130);
-      kf=[{transform:`translate(${x}px,${y}px) rotate(0deg) scale(.4)`,opacity:0},{offset:.12,opacity:1},{offset:.6,transform:`translate(${x+dx*0.6}px,${y-H*0.62}px) rotate(${R(-70,70)*0.6}deg) scale(1)`},{transform:`translate(${x+dx}px,${y-H-120}px) rotate(${R(-120,120)}deg) scale(.7)`,opacity:0}];}
-    else if(mode==="burst"){const cx=W/2,cy=H/2,a=R(0,6.283),d=R(120,Math.max(W,H)*0.78);
-      x=cx;y=cy;dur=R(900,1900);
-      kf=[{transform:`translate(${cx}px,${cy}px) scale(.2) rotate(0deg)`,opacity:0},{offset:.15,opacity:1,transform:`translate(${cx+Math.cos(a)*d*.25}px,${cy+Math.sin(a)*d*.25}px) scale(1.1) rotate(${R(-40,40)}deg)`},{transform:`translate(${cx+Math.cos(a)*d}px,${cy+Math.sin(a)*d+R(0,160)}px) scale(.5) rotate(${R(-200,200)}deg)`,opacity:0}];}
-    else if(mode==="rain"){x=R(0,W);y=-60;const dx=R(-60,60);
-      kf=[{transform:`translate(${x}px,${y}px) rotate(${R(-30,30)}deg) scale(.6)`,opacity:0},{offset:.1,opacity:1},{transform:`translate(${x+dx}px,${H+80}px) rotate(${R(-180,180)}deg) scale(1)`,opacity:0}];}
-    else if(mode==="spiral"){const cx=W/2,cy=H*0.56,a0=R(0,6.283),rr=R(90,Math.min(W,H)*0.55),turns=R(1.2,2.4);
-      dur=R(1800,3200);
-      const mid=[cx+Math.cos(a0+turns*3.14)*rr*0.5,cy+Math.sin(a0+turns*3.14)*rr*0.5-H*0.1];
-      kf=[{transform:`translate(${cx}px,${cy}px) scale(.3)`,opacity:0},{offset:.2,opacity:1},{offset:.6,transform:`translate(${mid[0]}px,${mid[1]}px) scale(1.05) rotate(${R(-90,90)}deg)`},{transform:`translate(${cx+Math.cos(a0+turns*6.28)*rr}px,${cy+Math.sin(a0+turns*6.28)*rr-H*0.35}px) scale(.6) rotate(${R(-220,220)}deg)`,opacity:0}];}
-    else if(mode==="corners"){const left=Math.random()<.5;const sx=left?-30:W+30,sy=H+30;const ex=left?R(W*0.3,W):R(0,W*0.7);
-      kf=[{transform:`translate(${sx}px,${sy}px) scale(.3)`,opacity:0},{offset:.14,opacity:1},{offset:.55,transform:`translate(${(sx+ex)/2}px,${R(H*0.1,H*0.4)}px) scale(1.1) rotate(${R(-60,60)}deg)`},{transform:`translate(${ex}px,${-80}px) scale(.6) rotate(${R(-160,160)}deg)`,opacity:0}];}
-    else{x=R(0,W);y=H*R(.45,.95);const amp=R(40,150);
-      kf=[{transform:`translate(${x}px,${y}px) scale(.3)`,opacity:0},{offset:.2,opacity:1,transform:`translate(${x+amp}px,${y-H*0.2}px) scale(1)`},{offset:.6,transform:`translate(${x-amp*0.7}px,${y-H*0.5}px) scale(1.05) rotate(${R(-50,50)}deg)`},{transform:`translate(${x+amp*0.4}px,${-70}px) scale(.55) rotate(${R(-140,140)}deg)`,opacity:0}];}
-    fx.appendChild(el);
-    const an=el.animate(kf,{duration:dur,delay,easing:PICK(["cubic-bezier(.2,.7,.3,1)","ease-out","cubic-bezier(.4,0,.2,1)","linear"]),fill:"forwards"});
-    an.onfinish=()=>el.remove();
-    setTimeout(()=>el.remove(),dur+delay+400);
-  }
+function judge(g){
+  let h=0;["e","m","t","l"].forEach(k=>{if(g[k]<0)h-=g[k]});if(g.p>0)h+=g.p;
+  const net=(g.e+g.m+g.t+g.l)-g.p;
+  if(net>=3)return{v:1,mag:Math.max(1,net/3)};
+  if(net<=-3)return{v:-1,mag:Math.max(1,h/2)};
+  return{v:0,mag:1};
 }
-const CSET=[["💧","😢","💔"],["😭","💧","🥺"],["💧","💧","🌧"],["💔","🥀","💧"],["😞","💧","💧"],["🩶","💧","😔"]];
-const CPAL=[["#7FA6D9","#BBD2EE","#4F6E9E"],["#8E9BE8","#C7CDF5","#5A63A8"],["#9AA5B8","#D3DAE6","#6B7385"],["#6FC3C0","#C4EAE8","#3F7F7D"],["#A08FB8","#D8CCE8","#6B5A82"]];
-const CMODES=["fall","drip","streak","welldown","sink"];
-const SADFACE=["😢","🥺","😔","😞","😣","🙁"];
-let cxSeq=0;
-function cryBurst(mag){
+function burst(kind,mag){
   const fx=$("fx");if(!fx)return;
-  const box=$("lovebox");if(box){box.classList.remove("crack");void box.offsetWidth;box.classList.add("crack")}
+  const cfg=FX[kind]||FX.smile;
+  const box=$("lovebox");
+  if(box){box.classList.remove("pump","crack");if(cfg.badge){void box.offsetWidth;box.classList.add(cfg.badge)}}
   if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
   const W=innerWidth,H=innerHeight;
-  const gl=PICK(CSET),pal=PICK(CPAL),mode=CMODES[(cxSeq++ + RI(0,2))%CMODES.length];
+  const gl=PICK(cfg.g),pal=PICK(cfg.p),mode=cfg.m[(fxSeq+++RI(0,2))%cfg.m.length];
   const dens=Math.min(1,Math.max(.4,(W*H)/(1280*800)));
-  const n=Math.max(8,Math.round(Math.min(95,16+mag*4.5+R(0,14))*dens));
-  const vg=document.createElement("div");vg.className="vig";fx.appendChild(vg);
-  const va=vg.animate([{opacity:0},{opacity:1,offset:.25},{opacity:0}],{duration:R(1100,1800),easing:"ease-in-out",fill:"forwards"});
-  va.onfinish=()=>vg.remove();setTimeout(()=>vg.remove(),2400);
+  const n=Math.max(kind==="smile"?6:8,Math.round(Math.min(cfg.cap,cfg.base+mag*cfg.per+R(0,kind==="smile"?6:15))*dens));
+  if(cfg.vig){
+    const vg=document.createElement("div");vg.className="vig";fx.appendChild(vg);
+    const va=vg.animate([{opacity:0},{opacity:1,offset:.25},{opacity:0}],{duration:R(1100,1800),easing:"ease-in-out",fill:"forwards"});
+    va.onfinish=()=>vg.remove();setTimeout(()=>vg.remove(),2400);
+  }
   for(let i=0;i<n;i++){
     const el=document.createElement("span");
     el.textContent=PICK(gl);
-    const sz=R(12,38)*(Math.random()<0.1?1.6:1);
-    el.style.fontSize=sz+"px";
-    if(/[🩶]/.test(el.textContent)||Math.random()<0.35){el.style.color=PICK(pal);el.style.textShadow="0 0 "+R(5,16)+"px "+PICK(pal)}
-    el.style.filter="saturate(.85)";
-    let kf,x,y,dur=R(1400,2900),delay=R(0,700);
-    if(mode==="fall"){x=R(0,W);y=-50;const dx=R(-40,40);
-      kf=[{transform:`translate(${x}px,${y}px) scale(.5) rotate(0deg)`,opacity:0},{offset:.12,opacity:1},
+    const big=Math.random()<(kind==="smile"?.08:.12);
+    el.style.fontSize=R(kind==="smile"?14:12,kind==="smile"?34:42)*(big?1.6:1)+"px";
+    if(Math.random()<(kind==="love"?.45:.8)){const c=PICK(pal);el.style.color=c;el.style.textShadow="0 0 "+R(5,18)+"px "+c}
+    if(kind==="cry")el.style.filter="saturate(.85)";
+    let kf,x,y,dur=R(1400,3000),delay=R(0,kind==="smile"?420:680);
+    if(mode==="rise"){x=R(-20,W);y=H+40;const dx=R(-130,130);
+      kf=[{transform:`translate(${x}px,${y}px) rotate(0deg) scale(.4)`,opacity:0},{offset:.12,opacity:1},
+          {offset:.6,transform:`translate(${x+dx*.6}px,${y-H*.62}px) rotate(${R(-40,40)}deg) scale(1)`},
+          {transform:`translate(${x+dx}px,${y-H-120}px) rotate(${R(-120,120)}deg) scale(.7)`,opacity:0}];}
+    else if(mode==="burst"){const cx=W/2,cy=H/2,a=R(0,6.283),d=R(120,Math.max(W,H)*.78);dur=R(900,1900);
+      kf=[{transform:`translate(${cx}px,${cy}px) scale(.2)`,opacity:0},
+          {offset:.15,opacity:1,transform:`translate(${cx+Math.cos(a)*d*.25}px,${cy+Math.sin(a)*d*.25}px) scale(1.1) rotate(${R(-40,40)}deg)`},
+          {transform:`translate(${cx+Math.cos(a)*d}px,${cy+Math.sin(a)*d+R(0,160)}px) scale(.5) rotate(${R(-200,200)}deg)`,opacity:0}];}
+    else if(mode==="spiral"){const cx=W/2,cy=H*.56,a0=R(0,6.283),rr=R(90,Math.min(W,H)*.55),tn=R(1.2,2.4);dur=R(1800,3200);
+      const mx=cx+Math.cos(a0+tn*3.14)*rr*.5,my=cy+Math.sin(a0+tn*3.14)*rr*.5-H*.1;
+      kf=[{transform:`translate(${cx}px,${cy}px) scale(.3)`,opacity:0},{offset:.2,opacity:1},
+          {offset:.6,transform:`translate(${mx}px,${my}px) scale(1.05) rotate(${R(-90,90)}deg)`},
+          {transform:`translate(${cx+Math.cos(a0+tn*6.28)*rr}px,${cy+Math.sin(a0+tn*6.28)*rr-H*.35}px) scale(.6) rotate(${R(-220,220)}deg)`,opacity:0}];}
+    else if(mode==="corners"){const lf=Math.random()<.5,sx=lf?-30:W+30,sy=H+30,ex=lf?R(W*.3,W):R(0,W*.7);
+      kf=[{transform:`translate(${sx}px,${sy}px) scale(.3)`,opacity:0},{offset:.14,opacity:1},
+          {offset:.55,transform:`translate(${(sx+ex)/2}px,${R(H*.1,H*.4)}px) scale(1.1) rotate(${R(-60,60)}deg)`},
+          {transform:`translate(${ex}px,-80px) scale(.6) rotate(${R(-160,160)}deg)`,opacity:0}];}
+    else if(mode==="wave"){x=R(0,W);y=H*R(.45,.95);const am=R(40,150);
+      kf=[{transform:`translate(${x}px,${y}px) scale(.3)`,opacity:0},
+          {offset:.2,opacity:1,transform:`translate(${x+am}px,${y-H*.2}px) scale(1)`},
+          {offset:.6,transform:`translate(${x-am*.7}px,${y-H*.5}px) scale(1.05) rotate(${R(-50,50)}deg)`},
+          {transform:`translate(${x+am*.4}px,-70px) scale(.55) rotate(${R(-140,140)}deg)`,opacity:0}];}
+    else if(mode==="fall"){x=R(0,W);y=-50;const dx=R(-40,40);
+      kf=[{transform:`translate(${x}px,${y}px) rotate(${R(-30,30)}deg) scale(.5)`,opacity:0},{offset:.12,opacity:1},
           {offset:.55,transform:`translate(${x+dx*.5}px,${H*.5}px) scale(1) rotate(${R(-20,20)}deg)`},
           {transform:`translate(${x+dx}px,${H+70}px) scale(.8) rotate(${R(-40,40)}deg)`,opacity:0}];}
     else if(mode==="drip"){x=R(W*.2,W*.8);y=-40;dur=R(900,1700);
       kf=[{transform:`translate(${x}px,${y}px) scaleY(.6) scaleX(1.1)`,opacity:0},{offset:.1,opacity:1},
           {offset:.8,transform:`translate(${x+R(-14,14)}px,${H*.86}px) scaleY(1.5) scaleX(.75)`,opacity:1},
           {transform:`translate(${x+R(-26,26)}px,${H*.95}px) scaleY(.4) scaleX(1.6)`,opacity:0}];}
-    else if(mode==="streak"){const dir=Math.random()<.5?1:-1;x=dir>0?R(-120,W*.6):R(W*.4,W+120);y=-60;
-      dur=R(800,1500);
+    else if(mode==="streak"){const dir=Math.random()<.5?1:-1;x=dir>0?R(-120,W*.6):R(W*.4,W+120);y=-60;dur=R(800,1500);
       kf=[{transform:`translate(${x}px,${y}px) rotate(${dir*16}deg) scale(.6)`,opacity:0},{offset:.1,opacity:.95},
           {transform:`translate(${x+dir*R(160,420)}px,${H+80}px) rotate(${dir*16}deg) scale(1)`,opacity:0}];}
-    else if(mode==="welldown"){const cx=W/2,cy=H*.3,a=R(.25,2.89);
-      const d=R(120,Math.max(W,H)*.7);dur=R(1200,2200);
-      kf=[{transform:`translate(${cx}px,${cy}px) scale(.2)`,opacity:0},{offset:.18,opacity:1,transform:`translate(${cx+Math.cos(a)*d*.3}px,${cy+Math.sin(a)*d*.3}px) scale(1)`},
+    else if(mode==="welldown"){const cx=W/2,cy=H*.3,a=R(.25,2.89),d=R(120,Math.max(W,H)*.7);dur=R(1200,2200);
+      kf=[{transform:`translate(${cx}px,${cy}px) scale(.2)`,opacity:0},
+          {offset:.18,opacity:1,transform:`translate(${cx+Math.cos(a)*d*.3}px,${cy+Math.sin(a)*d*.3}px) scale(1)`},
           {transform:`translate(${cx+Math.cos(a)*d}px,${cy+Math.sin(a)*d+H*.35}px) scale(.6) rotate(${R(-60,60)}deg)`,opacity:0}];}
     else{x=R(0,W);y=H*R(.2,.6);dur=R(1800,3200);
       kf=[{transform:`translate(${x}px,${y}px) scale(.4)`,opacity:0},{offset:.2,opacity:.9},
           {offset:.65,transform:`translate(${x+R(-30,30)}px,${y+H*.25}px) scale(1)`},
           {transform:`translate(${x+R(-50,50)}px,${H+60}px) scale(.7)`,opacity:0}];}
     fx.appendChild(el);
-    const an=el.animate(kf,{duration:dur,delay,easing:PICK(["cubic-bezier(.4,0,.6,1)","ease-in","linear","cubic-bezier(.55,0,.9,.6)"]),fill:"forwards"});
+    const an=el.animate(kf,{duration:dur,delay,easing:PICK(["cubic-bezier(.2,.7,.3,1)","ease-out","cubic-bezier(.4,0,.2,1)","linear"]),fill:"forwards"});
     an.onfinish=()=>el.remove();
     setTimeout(()=>el.remove(),dur+delay+400);
   }
 }
-function harmOf(g){let h=0;["e","m","t","l"].forEach(k=>{if(g[k]<0)h-=g[k]});if(g.p>0)h+=g.p;return h}
+const SADFACE=["😢","🥺","😔","😞","😣","🙁"];
 /* ---------- 渲染 ---------- */
 function hud(){
   const h=$("hud");h.hidden=false;const A=S.A;
@@ -893,16 +894,16 @@ function pick(i){
     S.D.crack=1;ban("d","🔴 打上 Debuff【裂痕标记】：你在她最脆弱的时候讲了道理。信任上限锁死在 80。");
   }
   derive();
-  const dead=deathCheck(),harm=harmOf(gain);
+  const dead=deathCheck(),J=judge(gain);
   render(`<div style="padding-top:18px"><div class="card">
     <div class="eyebrow">第 ${S.day} 天 · 事件 ${S.si+1}/${S.q.length}</div>
     <p class="scene">${d.s}</p>${say(d.q)}
     <div class="opts"><button class="opt picked" disabled><span class="k">${"ABCD"[pos<0?0:pos]}</span><span class="tx">${o.tx}</span><span class="tag">倾向：${o.tag||"—"}</span></button></div>
-    <div class="react">${say(o.r,"",harm>=2?PICK(SADFACE):"")}</div>
+    <div class="react">${say(o.r,"",J.v<0?PICK(SADFACE):"")}</div>
     </div>${bans()}
     <button class="btn" id="nx">${dead?"……":"继续"}</button></div>`);
   hud();
-  if(gain.l>0)heartBurst(gain.l);else if(harm>=2)cryBurst(harm);
+  burst(J.v>0?"love":J.v<0?"cry":"smile",J.mag);
   if(dead){on("nx",()=>ending("break"));return}
   on("nx",()=>{S.si++;step()});
 }
@@ -1017,14 +1018,14 @@ function actRun(id){
     const gain=apply(o.d,o.m,id==="tanxin"?"deep":"act");
     if(o.acc)S.H.acc=cl(S.H.acc+o.acc);
     S.acts.push(id);derive();
-    const dead=deathCheck(),harm=harmOf(gain);
+    const dead=deathCheck(),J=judge(gain);
     render(`<div style="padding-top:18px"><div class="banner s">💠 主动互动 · ${a.n}</div>
       <div class="card"><p class="scene">${a.i}</p>${say(a.q)}
       <div class="opts"><button class="opt picked" disabled><span class="tx">${o.tx}</span></button></div>
-      <div class="react">${say(o.r,"",harm>=2?PICK(SADFACE):"")}</div></div>${bans()}
+      <div class="react">${say(o.r,"",J.v<0?PICK(SADFACE):"")}</div></div>${bans()}
       <button class="btn" id="bk">返回结算</button></div>`);
     hud();
-    if(gain.l>0)heartBurst(gain.l);else if(harm>=2)cryBurst(harm);
+    burst(J.v>0?"love":J.v<0?"cry":"smile",J.mag);
     on("bk",()=>dead?ending("break"):settle());
   });
 }
@@ -1052,15 +1053,15 @@ function actQA(a,bi){
     const gain=apply(o.d,o.m,"act");
     if(o.acc)S.H.acc=cl(S.H.acc+o.acc);
     S.acts.push(a.id);derive();
-    const dead=deathCheck(),harm=harmOf(gain);
+    const dead=deathCheck(),J=judge(gain);
     render(`<div style="padding-top:18px">${head}
       <div class="card"><p class="scene">${a.i}</p>${say(a.q)}${ask}
       <div class="react">${say(b.her)}</div>
       <div class="opts" style="margin-top:16px"><button class="opt picked" disabled><span class="k">你</span><span class="tx">${o.tx}</span></button></div>
-      <div class="react">${say(o.r,"",harm>=2?PICK(SADFACE):"")}</div></div>${bans()}
+      <div class="react">${say(o.r,"",J.v<0?PICK(SADFACE):"")}</div></div>${bans()}
       <button class="btn" id="bk">返回结算</button></div>`);
     hud();
-    if(gain.l>0)heartBurst(gain.l);else if(harm>=2)cryBurst(harm);
+    burst(J.v>0?"love":J.v<0?"cry":"smile",J.mag);
     on("bk",()=>dead?ending("break"):settle());
   });
 }
